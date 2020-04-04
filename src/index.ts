@@ -1,13 +1,13 @@
 import 'parsers-ts';
-import { word, spaces, str, digits, reg } from 'parsers-ts/build/ParserCreators';
+import { word, spaces, str, digits } from 'parsers-ts/build/ParserCreators';
 import { colors } from './colors';
-import { sequenceOf, choice, manyJoin } from 'parsers-ts/build/ParserCombinators';
+import { sequenceOf, choice, manyJoin, between } from 'parsers-ts/build/ParserCombinators';
 import { Parser } from 'parsers-ts/build/Parser';
 import { ParserState } from 'parsers-ts/build/ParserState';
 
 const colon = str(':');
 const parsers: Map<string, Parser<any>> = new Map(Object.entries({
-	timestamp: sequenceOf(digits, colon, digits, colon, digits)
+	timestamp: sequenceOf([digits, colon, digits, colon, digits])
 		.map(result => ({
 			hours: Number(result[0]),
 			minutes: Number(result[2]),
@@ -54,18 +54,17 @@ const getArgumentParsers = async (args: Arg[]) => {
 // PS after code: will fail by means of the parser not parsing the entire syntax
 // Get a parser out of it that will parse the arguments of the command
 const getSyntaxParser = async (syntax: string) => {
-	syntax = syntax + ' ';
-	const reqse = sequenceOf(word, colon, word, reg(/^[^=]/)).map(
+	const reqse = sequenceOf([word, colon, word]).map(
 		result => ({type: result[0], name: result[2]})
 	) as Parser<Arg>;
 	
-	const optse = reqse.chain(result => {
+	const optse = between(str('['), str(']'))(reqse.chain(result => {
 			if (parsers.has(result.type))
-				return sequenceOf(str('='), parsers.get(result.type))
+				return sequenceOf([str('='), parsers.get(result.type)])
 					.map(value => ({...result, default: value[1]}));
-		});
+		}));
 	
-	const sep = choice(sequenceOf(str(','), spaces), spaces);
+	const sep = sequenceOf([str(','), spaces], 1);
 	
 
 	const syntaxers: {required: Parser<{[x: string]: any}>[], optional: Parser<{[x: string]: any}>[]}
@@ -73,13 +72,12 @@ const getSyntaxParser = async (syntax: string) => {
 
 	try {
 		const requiredState = manyJoin(reqse, sep, 0, false).run(syntax) as ParserState<Arg[]>;
-		let optional: Parser<Arg[]>;
-		if (requiredState.result.length) 
-			optional = sequenceOf(sep, manyJoin(optse, sep, 0, false))
-				.map(result => result[1]);
-		else optional = manyJoin(optse, sep, 0, false);
-		const optionalState = optional.transformer(requiredState);
-		
+		console.log(requiredState);
+		let optionaler = choice(manyJoin(optse, sep, 0, false), Parser.void);
+		if (requiredState.result.length && requiredState.index < requiredState.targetString.length) 
+			optionaler = sequenceOf([sep, optionaler]).map(result => result[1]);
+		const optionalState = optionaler.transformer(requiredState);
+		console.log(optionalState);
 		if (requiredState.error)
 			throw 'requiredState ' + JSON.stringify(requiredState, null, '  ');
 		if (optionalState.error)
@@ -91,15 +89,25 @@ const getSyntaxParser = async (syntax: string) => {
 			syntaxers.optional = await getArgumentParsers(optionalState.result);
 
 		return Promise.resolve(
-			(sequenceOf(...syntaxers.required) as Parser<{[x: string]: any}[]>)
+			new Parser(inputState => {
+				const nextState = ((sequenceOf(syntaxers.required) as Parser<{[x: string]: any}[]>)
 				.chain(reqs =>
-					(sequenceOf(...syntaxers.optional) as Parser<{[x: string]: any}[]>)
+					(sequenceOf(syntaxers.optional) as Parser<{[x: string]: any}[]>)
 						.mapError(() => null)
 						.map(opts => new Map([
 							...reqs.map(req => Object.entries(req)[0]),
 							...opts.map(opt => Object.entries(opt)[0])
 						]))
-				) as Parser<Map<string, any>>
+				) as Parser<Map<string, any>>).transformer(inputState);
+
+				if (nextState.index < nextState.targetString.length)
+					return ParserState.errorify(nextState, (targetString, index) =>
+						`The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.substring(index)}')`
+					);
+				
+				return nextState;
+			})
+			
 		);
 		
 	} catch (err) {
@@ -122,10 +130,11 @@ const getSyntaxParser = async (syntax: string) => {
 const prefix = 'plz:';
 const commands = new Map(Object.entries({
 	play: {
-		syntax: 'timestamp:start_at=00:00:00',
+		syntax: '[timestamp:start_at]',
 		description: 'hello I\'m a good command',
 		run: (args: Map<string, any>): void => {
-			console.log(`Playing at timestamp ${args.get('timestamp')}`);
+			const sa = args.get('start_at') as {hours: number, minutes: number, seconds: number};
+			console.log(`Playing at timestamp ${sa.hours}h${sa.minutes}m${sa.seconds}s`);
 		}
 	}
 }));
@@ -159,7 +168,9 @@ const interpret = async (input: string) => {
 		return Promise.resolve();
 		
 	} catch (err) {
-		return Promise.reject(err);
+		console.log(`${colors.FgRed}[ERROR]:${colors.Reset} ${err.toString()}`);
+		// return Promise.reject(err);
+		return Promise.resolve();
 	}
 }
 
@@ -168,5 +179,9 @@ const interpret = async (input: string) => {
 
 // Ready for the test...?? <_<
 
-interpret(`plz:play [timestamp:start_at]`)
-.catch(err => console.log(`${colors.FgRed}[ERROR]:${colors.Reset} ${err.toString()}`));
+interpret(`plz:play`);
+interpret(`plz:play `);
+interpret(`plz:play 1`);
+interpret(`plz:play 13:24:59`);
+interpret(`plz:play 1111:0984:5`);
+interpret(`plz:play 0:0:123156516`);
