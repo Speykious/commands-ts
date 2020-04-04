@@ -63,9 +63,9 @@ const getSyntaxParser = async (syntax) => {
         const optionalState = optionaler.transformer(requiredState);
         console.log(optionalState);
         if (requiredState.error)
-            throw 'requiredState ' + JSON.stringify(requiredState, null, '  ');
+            throw `Required argument: ${requiredState.error}`;
         if (optionalState.error)
-            throw 'optionalState ' + JSON.stringify(optionalState, null, '  ');
+            throw `Optional argument: ${optionalState.error}`;
         if (requiredState.result)
             syntaxers.required = await getArgumentParsers(requiredState.result);
         if (optionalState.result)
@@ -78,7 +78,7 @@ const getSyntaxParser = async (syntax) => {
                 ...reqs.map(req => Object.entries(req)[0]),
                 ...opts.map(opt => Object.entries(opt)[0])
             ]))).transformer(inputState);
-            if (nextState.index < nextState.targetString.length)
+            if (syntax.length < optionalState.targetString.length)
                 return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.substring(index)}')`);
             return nextState;
         }));
@@ -101,7 +101,7 @@ const getSyntaxParser = async (syntax) => {
 const prefix = 'plz:';
 const commands = new Map(Object.entries({
     play: {
-        syntax: '[timestamp:start_at]',
+        syntax: '[timestamp:start_at=0:0:0]',
         description: 'hello I\'m a good command',
         run: (args) => {
             const sa = args.get('start_at');
@@ -147,7 +147,7 @@ const interpret = async (input) => {
 interpret(`plz:play`);
 interpret(`plz:play `);
 interpret(`plz:play 1`);
-interpret(`plz:play 13:24:59`);
+interpret(`plz:play 13:24:59 something`);
 interpret(`plz:play 1111:0984:5`);
 interpret(`plz:play 0:0:123156516`);
 //# sourceMappingURL=index.js.map
