@@ -5,22 +5,6 @@ import { sequenceOf, choice, manyJoin } from 'parsers-ts/maps/ParserCombinators'
 import { Parser } from 'parsers-ts/maps/Parser';
 import { ParserState } from 'parsers-ts/maps/ParserState';
 
-
-const cmd = `plz:play [timestamp:start_at]`;
-
-/**
- * Each command has first the prefix, then the name, then required arguments, then optional arguments.
- * Here the command has 0 required and 1 optional.
- * The command interpreter should therefore first analyze the prefix: if it isn't correct, we don't interpret anything more.									--> DONE
- * Then, if the prefix is correct, it should analyze the name of the command, which will always be of type word.																--> DONE
- * That word will then be used to find the command requested.
- * - If the name is not in the list of commands, we return an error: command doesn't exist.
- * - Else if the name is in the list, it points to a command that exists. The command interpreter should then use the syntax of that command to interpret the arguments (every syntax problem is gonna be managed by the command interpreter).
-*/
-
-
-const prefix = 'plz:';
-
 const colon = str(':');
 const parsers: Map<string, Parser<any>> = new Map(Object.entries({
 	timestamp: sequenceOf(digits, colon, digits, colon, digits)
@@ -29,13 +13,6 @@ const parsers: Map<string, Parser<any>> = new Map(Object.entries({
 			minutes: Number(result[2]),
 			seconds: Number(result[4])
 		}))
-}));
-
-const commands = new Map(Object.entries({
-	play: {
-		syntax: 'timestamp:start_at=00:00:00',
-		run: (timestamp: {hours: number, minutes: number, seconds: number}) => console.log(`Playing at timestamp ${timestamp}`)
-	}
 }));
 
 const shiftSpaces = (s: string) => {
@@ -113,7 +90,7 @@ const getSyntaxParser = async (syntax: string) => {
 							...reqs.map(req => Object.entries(req)[0]),
 							...opts.map(opt => Object.entries(opt)[0])
 						]))
-				)
+				) as Parser<Map<string, any>>
 		);
 		
 	} catch (err) {
@@ -121,23 +98,63 @@ const getSyntaxParser = async (syntax: string) => {
 	}
 }
 
-const interpret = async (cmd: string) => {
-	// Checking prefix
-	if (!cmd.startsWith(prefix)) return Promise.resolve();
-	cmd = cmd.substring(prefix.length);
+/**
+ * Each command has first the prefix, then the name, then required arguments, then optional arguments.
+ * Here the command has 0 required and 1 optional.
+ * The command interpreter should therefore first analyze the prefix: if it isn't correct, we don't interpret anything more.									--> DONE
+ * Then, if the prefix is correct, it should analyze the name of the command, which will always be of type word.																--> DONE
+ * That word will then be used to find the command requested.			 --> DONE
+ * - If the name is not in the list of commands, we return an error: command doesn't exist.																										 --> DONE
+ * - Else if the name is in the list, it points to a command that exists. The command interpreter should then use the syntax of that command to interpret the arguments (every syntax problem is gonna be managed by the command interpreter).
+ * - For this, we generate a parser using the syntax and return errors when it is not written in right form.																				--> DONE
+ * - Then, we parse the rest of the input to get the structured arguments for our command. They should fit the syntax, thus be successfully parsed by the newly generated parser. If they don't, the syntax parser would have returned the right nice error.
+*/
 
-	// Checking if the command name entered is a word
-	let nameParse = word.run(cmd);
-	if (nameParse.error)
-		return Promise.reject(`Command name is not a word`);
+const prefix = 'plz:';
+const commands = new Map(Object.entries({
+	play: {
+		syntax: 'timestamp:start_at=00:00:00',
+		description: 'hello I\'m a good command',
+		run: (args: Map<string, any>): void => {
+			console.log(`Playing at timestamp ${args.get('timestamp')}`);
+		}
+	}
+}));
 
-	// Checking if the command exists
-	let name = nameParse.result;
-	if (!commands.has(name))
-		return Promise.reject(`Command does not exist`);
-	cmd = shiftSpaces(cmd.substring(name.length));
+// some syntax: 'number:rolls, word:something=nothing
+const interpret = async (input: string) => {
+	try {
+		// Checking prefix
+		if (!input.startsWith(prefix)) return Promise.resolve();
+		input = input.substring(prefix.length);
 	
-	// Parsing the arguments using the command's syntax
-	// But first... Parse the command's syntax T-T
-	// That's fucking done, I created a syntax parser generator <_<
+		// Checking if the command name entered is a word
+		let nameParse = word.run(input);
+		if (nameParse.error) throw `Command name is not a word`;
+	
+		// Checking if the command exists
+		let name = nameParse.result;
+		if (!commands.has(name)) throw `Command does not exist`;
+		let cmd = commands.get(name);
+		input = shiftSpaces(input.substring(name.length));
+		
+		// Parsing the arguments using the command's syntax
+		// But first... Parse the command's syntax T-T
+		// That's fucking done, I created a syntax parser generator <_<
+		const argsState = (await getSyntaxParser(cmd.syntax)).run(input);
+		if (argsState.error) throw argsState.error;
+
+		cmd.run(argsState.result);
+		return Promise.resolve();
+		
+	} catch (err) {
+		return Promise.reject(err);
+	}
 }
+
+
+
+
+// Ready for the test...?? <_<
+
+interpret(`plz:play [timestamp:start_at]`);
