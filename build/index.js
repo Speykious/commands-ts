@@ -18,7 +18,7 @@ const parsers = new Map(Object.entries({
 const shiftSpaces = (s) => {
     let match = s.match(/^\s+/);
     if (match)
-        s = s.substring(match[0].length);
+        s = s.slice(match[0].length);
     return s;
 };
 const getArgumentParser = (arg) => {
@@ -78,9 +78,9 @@ const getSyntaxParser = async (syntax) => {
                 ...opts.map(opt => Object.entries(opt)[0])
             ]))).transformer(inputState);
             if (syntax.length < optionalState.targetString.length)
-                return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.substring(index)}')`);
+                return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.slice(index)}')`);
             if (nextState.index < nextState.targetString.length)
-                return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `Too many arguments: '${shiftSpaces(targetString.substring(index))}' is remaining`);
+                return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `Too many arguments: '${shiftSpaces(targetString.slice(index))}' is remaining`);
             return nextState;
         }));
     }
@@ -116,7 +116,7 @@ const interpret = async (input) => {
         // Checking prefix
         if (!input.startsWith(prefix))
             return Promise.resolve();
-        input = input.substring(prefix.length);
+        input = input.slice(prefix.length);
         // Checking if the command name entered is a word
         let nameParse = ParserCreators_1.word.run(input);
         if (nameParse.error)
@@ -126,7 +126,7 @@ const interpret = async (input) => {
         if (!commands.has(name))
             throw `Command does not exist`;
         let cmd = commands.get(name);
-        input = shiftSpaces(input.substring(name.length));
+        input = shiftSpaces(input.slice(name.length));
         // Parsing the arguments using the command's syntax
         // But first... Parse the command's syntax T-T
         // That's fucking done, I created a syntax parser generator <_<

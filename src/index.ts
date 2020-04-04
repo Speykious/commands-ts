@@ -17,7 +17,7 @@ const parsers: Map<string, Parser<any>> = new Map(Object.entries({
 
 const shiftSpaces = (s: string) => {
 	let match = s.match(/^\s+/);
-	if (match) s = s.substring(match[0].length);
+	if (match) s = s.slice(match[0].length);
 	return s;
 }
 
@@ -100,11 +100,11 @@ const getSyntaxParser = async (syntax: string) => {
 
 				if (syntax.length < optionalState.targetString.length)
 					return ParserState.errorify(nextState, (targetString, index) =>
-						`The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.substring(index)}')`
+						`The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.slice(index)}')`
 					);
 				
 				if (nextState.index < nextState.targetString.length)
-					return ParserState.errorify(nextState, (targetString, index) => `Too many arguments: '${shiftSpaces(targetString.substring(index))}' is remaining`);
+					return ParserState.errorify(nextState, (targetString, index) => `Too many arguments: '${shiftSpaces(targetString.slice(index))}' is remaining`);
 				
 				return nextState;
 			})
@@ -145,7 +145,7 @@ const interpret = async (input: string) => {
 	try {
 		// Checking prefix
 		if (!input.startsWith(prefix)) return Promise.resolve();
-		input = input.substring(prefix.length);
+		input = input.slice(prefix.length);
 	
 		// Checking if the command name entered is a word
 		let nameParse = word.run(input);
@@ -155,7 +155,7 @@ const interpret = async (input: string) => {
 		let name = nameParse.result;
 		if (!commands.has(name)) throw `Command does not exist`;
 		let cmd = commands.get(name);
-		input = shiftSpaces(input.substring(name.length));
+		input = shiftSpaces(input.slice(name.length));
 		
 		// Parsing the arguments using the command's syntax
 		// But first... Parse the command's syntax T-T
