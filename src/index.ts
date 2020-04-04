@@ -103,6 +103,9 @@ const getSyntaxParser = async (syntax: string) => {
 						`The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.substring(index)}')`
 					);
 				
+				if (nextState.index < nextState.targetString.length)
+					return ParserState.errorify(nextState, (targetString, index) => `Too many arguments: '${shiftSpaces(targetString.substring(index))}' is remaining`);
+				
 				return nextState;
 			})
 			
@@ -159,7 +162,7 @@ const interpret = async (input: string) => {
 		// That's fucking done, I created a syntax parser generator <_<
 		const argsState = (await getSyntaxParser(cmd.syntax)).run(input);
 		if (argsState.error) throw 'from argsState: ' + argsState.error;
-		if (argsState.index < input.length) throw `Too many arguments: '${input.substring(argsState.index)}' is remaining`;
+		
 
 		cmd.run(argsState.result);
 

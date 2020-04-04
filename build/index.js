@@ -80,6 +80,8 @@ const getSyntaxParser = async (syntax) => {
             ]))).transformer(inputState);
             if (syntax.length < optionalState.targetString.length)
                 return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.substring(index)}')`);
+            if (nextState.index < nextState.targetString.length)
+                return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `Too many arguments: '${shiftSpaces(targetString.substring(index))}' is remaining`);
             return nextState;
         }));
     }
@@ -132,8 +134,6 @@ const interpret = async (input) => {
         const argsState = (await getSyntaxParser(cmd.syntax)).run(input);
         if (argsState.error)
             throw 'from argsState: ' + argsState.error;
-        if (argsState.index < input.length)
-            throw `Too many arguments: '${input.substring(argsState.index)}' is remaining`;
         cmd.run(argsState.result);
         return Promise.resolve();
     }
