@@ -2,20 +2,31 @@
   "name": "commands-ts",
   "version": "0.0.0",
   "description": "Using parsers to make interpreting commands easier.",
-  "main": "./build/index.js",
+  "main": "build/index.js",
   "scripts": {
     "start": "node .",
-    "test": "node ./build/test.js"
+    "test": "jest --config jestconfig.json",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.test.ts\"",
+    "lint": "tslint -p tsconfig.json"
   },
+  "files": [
+    "build/**/*"
+  ],
   "repository": "git@github.com:Speykious/commands-ts.git",
   "author": "Speykious",
   "license": "GPL-3.0",
   "private": false,
   "devDependencies": {
+    "@types/jest": "^25.2.1",
     "@types/node": "^13.11.0",
+    "jest": "^25.2.7",
+    "prettier": "^2.0.2",
+    "ts-jest": "^25.3.1",
+    "tslint": "^6.1.1",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "parsers-ts": "^1.1.2"
+    "parsers-ts": "^2.0.0"
   }
 }

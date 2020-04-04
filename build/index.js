@@ -8,8 +8,7 @@ const Parser_1 = require("parsers-ts/build/Parser");
 const ParserState_1 = require("parsers-ts/build/ParserState");
 const colon = ParserCreators_1.str(':');
 const parsers = new Map(Object.entries({
-    timestamp: ParserCombinators_1.sequenceOf([ParserCreators_1.digits, colon, ParserCreators_1.digits, colon, ParserCreators_1.digits])
-        .map(result => ({
+    timestamp: ParserCombinators_1.sequenceOf([ParserCreators_1.digits, colon, ParserCreators_1.digits, colon, ParserCreators_1.digits]).map((result) => ({
         hours: Number(result[0]),
         minutes: Number(result[2]),
         seconds: Number(result[4])
@@ -22,10 +21,10 @@ const shiftSpaces = (s) => {
     return s;
 };
 const getArgumentParser = (arg) => {
-    return new Parser_1.Parser(inputState => {
-        let nextState = parsers.get(arg.type)
-            .map(result => ({ [arg.name]: result }))
-            .mapError((targetString, index) => `Invalid \`${arg.name}\` argument at index ${index}`).transformer(inputState);
+    return new Parser_1.Parser((inputState) => {
+        let nextState = parsers.get(arg.type).map((result) => ({ [arg.name]: result }))
+            .mapError((targetString, index) => `Invalid \`${arg.name}\` argument at index ${index}`)
+            .transformer(inputState);
         if (!arg.default || !nextState.error)
             return nextState;
         return { ...nextState, result: { [arg.name]: arg.default }, error: null };
@@ -46,11 +45,16 @@ const getArgumentParsers = async (args) => {
 // PS after code: will fail by means of the parser not parsing the entire syntax
 // Get a parser out of it that will parse the arguments of the command
 const getSyntaxParser = async (syntax) => {
-    const reqse = ParserCombinators_1.sequenceOf([ParserCreators_1.word, colon, ParserCreators_1.word]).map(result => ({ type: result[0], name: result[2] }));
-    const optse = ParserCombinators_1.between(ParserCreators_1.str('['), ParserCreators_1.str(']'))(reqse.chain(result => {
+    const reqse = ParserCombinators_1.sequenceOf([ParserCreators_1.word, colon, ParserCreators_1.word]).map((result) => ({
+        type: result[0],
+        name: result[2]
+    }));
+    const optse = ParserCombinators_1.between(ParserCreators_1.str('['), ParserCreators_1.str(']'))(reqse.chain((result) => {
         if (parsers.has(result.type))
-            return ParserCombinators_1.sequenceOf([ParserCreators_1.str('='), parsers.get(result.type)])
-                .map(value => ({ ...result, default: value[1] }));
+            return ParserCombinators_1.sequenceOf([ParserCreators_1.str('='), parsers.get(result.type)]).map((value) => ({
+                ...result,
+                default: value[1]
+            }));
     }));
     const sep = ParserCombinators_1.sequenceOf([ParserCreators_1.str(','), ParserCreators_1.spaces], 1);
     const syntaxers = { required: [], optional: [] };
@@ -59,7 +63,7 @@ const getSyntaxParser = async (syntax) => {
         console.log(requiredState);
         let optionaler = ParserCombinators_1.choice(ParserCombinators_1.manyJoin(optse, sep, 0, false), Parser_1.Parser.void);
         if (requiredState.result.length && requiredState.index < requiredState.targetString.length)
-            optionaler = ParserCombinators_1.sequenceOf([sep, optionaler]).map(result => result[1]);
+            optionaler = ParserCombinators_1.sequenceOf([sep, optionaler]).map((result) => result[1]);
         const optionalState = optionaler.transformer(requiredState);
         console.log(optionalState);
         if (requiredState.error)
@@ -70,12 +74,10 @@ const getSyntaxParser = async (syntax) => {
             syntaxers.required = await getArgumentParsers(requiredState.result);
         if (optionalState.result)
             syntaxers.optional = await getArgumentParsers(optionalState.result);
-        return Promise.resolve(new Parser_1.Parser(inputState => {
-            const nextState = ParserCombinators_1.sequenceOf(syntaxers.required)
-                .chain(reqs => ParserCombinators_1.sequenceOf(syntaxers.optional, 0)
-                .map(opts => new Map([
-                ...reqs.map(req => Object.entries(req)[0]),
-                ...opts.map(opt => Object.entries(opt)[0])
+        return Promise.resolve(new Parser_1.Parser((inputState) => {
+            const nextState = ParserCombinators_1.sequenceOf(syntaxers.required).chain((reqs) => ParserCombinators_1.sequenceOf(syntaxers.optional, 0).map((opts) => new Map([
+                ...reqs.map((req) => Object.entries(req)[0]),
+                ...opts.map((opt) => Object.entries(opt)[0])
             ]))).transformer(inputState);
             if (syntax.length < optionalState.targetString.length)
                 return ParserState_1.ParserState.errorify(nextState, (targetString, index) => `The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.slice(index)}')`);
@@ -98,12 +100,12 @@ const getSyntaxParser = async (syntax) => {
  * - Else if the name is in the list, it points to a command that exists. The command interpreter should then use the syntax of that command to interpret the arguments (every syntax problem is gonna be managed by the command interpreter).
  * - For this, we generate a parser using the syntax and return errors when it is not written in right form.																				--> DONE
  * - Then, we parse the rest of the input to get the structured arguments for our command. They should fit the syntax, thus be successfully parsed by the newly generated parser. If they don't, the syntax parser would have returned the right nice error.
-*/
+ */
 const prefix = 'plz:';
 const commands = new Map(Object.entries({
     play: {
         syntax: '[timestamp:start_at=0:0:0]',
-        description: 'hello I\'m a good command',
+        description: "hello I'm a good command",
         run: (args) => {
             const sa = args.get('start_at');
             console.log(`Playing at timestamp ${sa.hours}h${sa.minutes}m${sa.seconds}s`);
