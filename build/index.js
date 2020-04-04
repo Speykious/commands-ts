@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-require("parsers-ts");
 const ParserCreators_1 = require("parsers-ts/build/ParserCreators");
 const colors_1 = require("./colors");
 const ParserCombinators_1 = require("parsers-ts/build/ParserCombinators");
@@ -22,7 +21,9 @@ const shiftSpaces = (s) => {
 };
 const getArgumentParser = (arg) => {
     return new Parser_1.Parser((inputState) => {
-        let nextState = parsers.get(arg.type).map((result) => ({ [arg.name]: result }))
+        let nextState = parsers
+            .get(arg.type)
+            .map((result) => ({ [arg.name]: result }))
             .mapError((targetString, index) => `Invalid \`${arg.name}\` argument at index ${index}`)
             .transformer(inputState);
         if (!arg.default || !nextState.error)
@@ -62,7 +63,8 @@ const getSyntaxParser = async (syntax) => {
         const requiredState = ParserCombinators_1.manyJoin(reqse, sep, 0, false).run(syntax);
         console.log(requiredState);
         let optionaler = ParserCombinators_1.choice(ParserCombinators_1.manyJoin(optse, sep, 0, false), Parser_1.Parser.void);
-        if (requiredState.result.length && requiredState.index < requiredState.targetString.length)
+        if (requiredState.result.length &&
+            requiredState.index < requiredState.targetString.length)
             optionaler = ParserCombinators_1.sequenceOf([sep, optionaler]).map((result) => result[1]);
         const optionalState = optionaler.transformer(requiredState);
         console.log(optionalState);

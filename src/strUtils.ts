@@ -5,7 +5,7 @@ export const pad = (n: number | string, width: number, z = '0') => {
 };
 
 export const shiftSpaces = (s: string) => {
-	let match = s.match(/^\s+/);
+	const match = s.match(/^\s+/);
 	if (match) s = s.slice(match[0].length);
 	return s;
 };
