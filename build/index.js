@@ -26,7 +26,7 @@ const getArgumentParser = (arg) => {
         let nextState = parsers.get(arg.type)
             .map(result => ({ [arg.name]: result }))
             .mapError((targetString, index) => `Invalid \`${arg.name}\` argument at index ${index}`).transformer(inputState);
-        if (!arg.default)
+        if (!arg.default || !nextState.error)
             return nextState;
         return { ...nextState, result: { [arg.name]: arg.default }, error: null };
     });
@@ -72,8 +72,7 @@ const getSyntaxParser = async (syntax) => {
             syntaxers.optional = await getArgumentParsers(optionalState.result);
         return Promise.resolve(new Parser_1.Parser(inputState => {
             const nextState = ParserCombinators_1.sequenceOf(syntaxers.required)
-                .chain(reqs => ParserCombinators_1.sequenceOf(syntaxers.optional)
-                .mapError(() => null)
+                .chain(reqs => ParserCombinators_1.sequenceOf(syntaxers.optional, 0)
                 .map(opts => new Map([
                 ...reqs.map(req => Object.entries(req)[0]),
                 ...opts.map(opt => Object.entries(opt)[0])
