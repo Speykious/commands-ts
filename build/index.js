@@ -46,7 +46,7 @@ const getArgumentParsers = async (args) => {
 // Get a parser out of it that will parse the arguments of the command
 const getSyntaxParser = async (syntax) => {
     syntax = syntax + ' ';
-    const reqse = ParserCombinators_1.sequenceOf(ParserCreators_1.word, colon, ParserCreators_1.word).map(result => ({ type: result[0], name: result[2] }));
+    const reqse = ParserCombinators_1.sequenceOf(ParserCreators_1.word, colon, ParserCreators_1.word, ParserCreators_1.reg(/^[^=]/)).map(result => ({ type: result[0], name: result[2] }));
     const optse = reqse.chain(result => {
         if (parsers.has(result.type))
             return ParserCombinators_1.sequenceOf(ParserCreators_1.str('='), parsers.get(result.type))
@@ -62,11 +62,11 @@ const getSyntaxParser = async (syntax) => {
                 .map(result => result[1]);
         else
             optional = ParserCombinators_1.manyJoin(optse, sep, 0, false);
-        const optionalState = (optional).transformer(requiredState);
+        const optionalState = optional.transformer(requiredState);
         if (requiredState.error)
-            throw requiredState.error;
+            throw 'requiredState ' + JSON.stringify(requiredState, null, '  ');
         if (optionalState.error)
-            throw optionalState.error;
+            throw 'optionalState ' + JSON.stringify(optionalState, null, '  ');
         if (requiredState.result)
             syntaxers.required = await getArgumentParsers(requiredState.result);
         if (optionalState.result)

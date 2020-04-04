@@ -1,5 +1,5 @@
 import 'parsers-ts';
-import { word, spaces, str, digits } from 'parsers-ts/build/ParserCreators';
+import { word, spaces, str, digits, reg } from 'parsers-ts/build/ParserCreators';
 import { colors } from './colors';
 import { sequenceOf, choice, manyJoin } from 'parsers-ts/build/ParserCombinators';
 import { Parser } from 'parsers-ts/build/Parser';
@@ -55,7 +55,7 @@ const getArgumentParsers = async (args: Arg[]) => {
 // Get a parser out of it that will parse the arguments of the command
 const getSyntaxParser = async (syntax: string) => {
 	syntax = syntax + ' ';
-	const reqse = sequenceOf(word, colon, word).map(
+	const reqse = sequenceOf(word, colon, word, reg(/^[^=]/)).map(
 		result => ({type: result[0], name: result[2]})
 	) as Parser<Arg>;
 	
@@ -78,11 +78,12 @@ const getSyntaxParser = async (syntax: string) => {
 			optional = sequenceOf(sep, manyJoin(optse, sep, 0, false))
 				.map(result => result[1]);
 		else optional = manyJoin(optse, sep, 0, false);
+		const optionalState = optional.transformer(requiredState);
 		
-		const optionalState = (optional).transformer(requiredState);
-		
-		if (requiredState.error) throw requiredState.error;
-		if (optionalState.error) throw optionalState.error;
+		if (requiredState.error)
+			throw 'requiredState ' + JSON.stringify(requiredState, null, '  ');
+		if (optionalState.error)
+			throw 'optionalState ' + JSON.stringify(optionalState, null, '  ');
 
 		if (requiredState.result)
 			syntaxers.required = await getArgumentParsers(requiredState.result);
