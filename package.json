@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Using parsers to make interpreting commands easier.",
   "main": "./build/index.js",
+  "scripts": {
+    "start": "node ."
+  },
   "repository": "git@github.com:Speykious/commands-ts.git",
   "author": "Speykious",
   "license": "GPL-3.0",
@@ -12,6 +15,6 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "parsers-ts": "^1.0.2"
+    "parsers-ts": "^1.0.3"
   }
 }

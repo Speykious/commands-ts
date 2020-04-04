@@ -1,9 +1,9 @@
 import 'parsers-ts';
-import { word, spaces, str, digits } from 'parsers-ts/maps/ParserCreators';
+import { word, spaces, str, digits } from 'parsers-ts/build/ParserCreators';
 import { colors } from './colors';
-import { sequenceOf, choice, manyJoin } from 'parsers-ts/maps/ParserCombinators';
-import { Parser } from 'parsers-ts/maps/Parser';
-import { ParserState } from 'parsers-ts/maps/ParserState';
+import { sequenceOf, choice, manyJoin } from 'parsers-ts/build/ParserCombinators';
+import { Parser } from 'parsers-ts/build/Parser';
+import { ParserState } from 'parsers-ts/build/ParserState';
 
 const colon = str(':');
 const parsers: Map<string, Parser<any>> = new Map(Object.entries({
@@ -54,6 +54,7 @@ const getArgumentParsers = async (args: Arg[]) => {
 // PS after code: will fail by means of the parser not parsing the entire syntax
 // Get a parser out of it that will parse the arguments of the command
 const getSyntaxParser = async (syntax: string) => {
+	syntax = syntax + ' ';
 	const reqse = sequenceOf(word, colon, word).map(
 		result => ({type: result[0], name: result[2]})
 	) as Parser<Arg>;
@@ -72,14 +73,21 @@ const getSyntaxParser = async (syntax: string) => {
 
 	try {
 		const requiredState = manyJoin(reqse, sep, 0, false).run(syntax) as ParserState<Arg[]>;
-		const optionalState = (sequenceOf(sep, manyJoin(optse, sep, 0, false))
-			.map(result => result[1]) as Parser<Arg[]>).transformer(requiredState);
+		let optional: Parser<Arg[]>;
+		if (requiredState.result.length) 
+			optional = sequenceOf(sep, manyJoin(optse, sep, 0, false))
+				.map(result => result[1]);
+		else optional = manyJoin(optse, sep, 0, false);
+		
+		const optionalState = (optional).transformer(requiredState);
 		
 		if (requiredState.error) throw requiredState.error;
 		if (optionalState.error) throw optionalState.error;
 
-		syntaxers.required = await getArgumentParsers(requiredState.result);
-		syntaxers.optional = await getArgumentParsers(optionalState.result);
+		if (requiredState.result)
+			syntaxers.required = await getArgumentParsers(requiredState.result);
+		if (optionalState.result)
+			syntaxers.optional = await getArgumentParsers(optionalState.result);
 
 		return Promise.resolve(
 			(sequenceOf(...syntaxers.required) as Parser<{[x: string]: any}[]>)
@@ -142,9 +150,11 @@ const interpret = async (input: string) => {
 		// But first... Parse the command's syntax T-T
 		// That's fucking done, I created a syntax parser generator <_<
 		const argsState = (await getSyntaxParser(cmd.syntax)).run(input);
-		if (argsState.error) throw argsState.error;
+		if (argsState.error) throw 'from argsState: ' + argsState.error;
+		if (argsState.index < input.length) throw `Too many arguments: '${input.substring(argsState.index)}' is remaining`;
 
 		cmd.run(argsState.result);
+
 		return Promise.resolve();
 		
 	} catch (err) {
@@ -157,4 +167,5 @@ const interpret = async (input: string) => {
 
 // Ready for the test...?? <_<
 
-interpret(`plz:play [timestamp:start_at]`);
+interpret(`plz:play [timestamp:start_at]`)
+.catch(err => console.log(`${colors.FgRed}[ERROR]:${colors.Reset} ${err.toString()}`));
