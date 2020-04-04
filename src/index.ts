@@ -1,17 +1,24 @@
 import { word, spaces, str, digits } from 'parsers-ts/build/ParserCreators';
 import { colors } from './colors';
-import { sequenceOf, choice, manyJoin, between } from 'parsers-ts/build/ParserCombinators';
+import {
+	sequenceOf,
+	choice,
+	manyJoin,
+	between
+} from 'parsers-ts/build/ParserCombinators';
 import { Parser } from 'parsers-ts/build/Parser';
 import { ParserState } from 'parsers-ts/build/ParserState';
 
 const colon = str(':');
 const parsers: Map<string, Parser<any>> = new Map(
 	Object.entries({
-		timestamp: sequenceOf([digits, colon, digits, colon, digits]).map((result) => ({
-			hours: Number(result[0]),
-			minutes: Number(result[2]),
-			seconds: Number(result[4])
-		}))
+		timestamp: sequenceOf([digits, colon, digits, colon, digits]).map(
+			(result) => ({
+				hours: Number(result[0]),
+				minutes: Number(result[2]),
+				seconds: Number(result[4])
+			})
+		)
 	})
 );
 
@@ -29,10 +36,15 @@ interface Arg {
 
 const getArgumentParser = (arg: Arg) => {
 	return new Parser((inputState) => {
-		let nextState = (parsers.get(arg.type).map((result) => ({ [arg.name]: result })) as Parser<{
+		let nextState = (parsers
+			.get(arg.type)
+			.map((result) => ({ [arg.name]: result })) as Parser<{
 			[x: string]: any;
 		}>)
-			.mapError((targetString, index) => `Invalid \`${arg.name}\` argument at index ${index}`)
+			.mapError(
+				(targetString, index) =>
+					`Invalid \`${arg.name}\` argument at index ${index}`
+			)
 			.transformer(inputState);
 
 		if (!arg.default || !nextState.error) return nextState;
@@ -45,7 +57,10 @@ const getArgumentParsers = async (args: Arg[]) => {
 	let argParsers: Parser<{ [x: string]: any }>[] = [];
 	for (let arg of args) {
 		if (parsers.has(arg.type)) argParsers.push(getArgumentParser(arg));
-		else return Promise.reject(`Type '${arg.type}' (from argument ${arg.name}) does not exist`);
+		else
+			return Promise.reject(
+				`Type '${arg.type}' (from argument ${arg.name}) does not exist`
+			);
 	}
 	return Promise.resolve(argParsers);
 };
@@ -66,10 +81,12 @@ const getSyntaxParser = async (syntax: string) => {
 	)(
 		reqse.chain((result) => {
 			if (parsers.has(result.type))
-				return sequenceOf([str('='), parsers.get(result.type)]).map((value) => ({
-					...result,
-					default: value[1]
-				}));
+				return sequenceOf([str('='), parsers.get(result.type)]).map(
+					(value) => ({
+						...result,
+						default: value[1]
+					})
+				);
 		})
 	);
 
@@ -81,25 +98,34 @@ const getSyntaxParser = async (syntax: string) => {
 	} = { required: [], optional: [] };
 
 	try {
-		const requiredState = manyJoin(reqse, sep, 0, false).run(syntax) as ParserState<Arg[]>;
+		const requiredState = manyJoin(reqse, sep, 0, false).run(
+			syntax
+		) as ParserState<Arg[]>;
 		console.log(requiredState);
 		let optionaler = choice(manyJoin(optse, sep, 0, false), Parser.void);
-		if (requiredState.result.length && requiredState.index < requiredState.targetString.length)
+		if (
+			requiredState.result.length &&
+			requiredState.index < requiredState.targetString.length
+		)
 			optionaler = sequenceOf([sep, optionaler]).map((result) => result[1]);
 		const optionalState = optionaler.transformer(requiredState);
 		console.log(optionalState);
 		if (requiredState.error) throw `Required argument: ${requiredState.error}`;
 		if (optionalState.error) throw `Optional argument: ${optionalState.error}`;
 
-		if (requiredState.result) syntaxers.required = await getArgumentParsers(requiredState.result);
-		if (optionalState.result) syntaxers.optional = await getArgumentParsers(optionalState.result);
+		if (requiredState.result)
+			syntaxers.required = await getArgumentParsers(requiredState.result);
+		if (optionalState.result)
+			syntaxers.optional = await getArgumentParsers(optionalState.result);
 
 		return Promise.resolve(
 			new Parser((inputState) => {
 				const nextState = ((sequenceOf(syntaxers.required) as Parser<
 					{ [x: string]: any }[]
 				>).chain((reqs) =>
-					(sequenceOf(syntaxers.optional, 0) as Parser<{ [x: string]: any }[]>).map(
+					(sequenceOf(syntaxers.optional, 0) as Parser<
+						{ [x: string]: any }[]
+					>).map(
 						(opts) =>
 							new Map([
 								...reqs.map((req) => Object.entries(req)[0]),
@@ -121,7 +147,9 @@ const getSyntaxParser = async (syntax: string) => {
 					return ParserState.errorify(
 						nextState,
 						(targetString, index) =>
-							`Too many arguments: '${shiftSpaces(targetString.slice(index))}' is remaining`
+							`Too many arguments: '${shiftSpaces(
+								targetString.slice(index)
+							)}' is remaining`
 					);
 
 				return nextState;
@@ -151,8 +179,14 @@ const commands = new Map(
 			syntax: '[timestamp:start_at=0:0:0]',
 			description: "hello I'm a good command",
 			run: (args: Map<string, any>): void => {
-				const sa = args.get('start_at') as { hours: number; minutes: number; seconds: number };
-				console.log(`Playing at timestamp ${sa.hours}h${sa.minutes}m${sa.seconds}s`);
+				const sa = args.get('start_at') as {
+					hours: number;
+					minutes: number;
+					seconds: number;
+				};
+				console.log(
+					`Playing at timestamp ${sa.hours}h${sa.minutes}m${sa.seconds}s`
+				);
 			}
 		}
 	})

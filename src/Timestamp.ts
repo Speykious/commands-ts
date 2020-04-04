@@ -16,6 +16,9 @@ export class Timestamp {
 	}
 
 	toString() {
-		return `${pad(this.hours, 2)}h${pad(this.minutes, 2)}m${pad(this.seconds, 2)}s`;
+		return `${pad(this.hours, 2)}h${pad(this.minutes, 2)}m${pad(
+			this.seconds,
+			2
+		)}s`;
 	}
 }
