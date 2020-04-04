@@ -16,6 +16,7 @@ interface Arg {
 }
 
 const colon = str(':');
+const comma = sequenceOf([str(','), spaces], 1);
 
 // Example of types object
 const types: Map<string, Parser<any>> = new Map(Object.entries({
@@ -24,6 +25,3 @@ const types: Map<string, Parser<any>> = new Map(Object.entries({
 		.mapError((targetString, index) => `Invalid timestamp format at index ${index}: got '${targetString.slice(index)}', should be hh:mm:ss`)
 }));
 
-
-
-const comma = sequenceOf([str(','), spaces], 1);

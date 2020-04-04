@@ -16,6 +16,6 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "parsers-ts": "^1.1.0"
+    "parsers-ts": "^1.1.2"
   }
 }
