@@ -25,7 +25,9 @@ const types: Map<string, Parser<any>> = new Map(
 			.map((result) => new Timestamp(result[0], result[2], result[4]))
 			.mapError(
 				(targetString, index) =>
-					`Invalid timestamp format at index ${index}: got '${targetString.slice(index)}', should be hh:mm:ss`
+					`Invalid timestamp format at index ${index}: got '${targetString.slice(
+						index
+					)}', should be hh:mm:ss`
 			)
 	})
 );
