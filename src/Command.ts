@@ -1,7 +1,11 @@
-import { sequenceOf, join } from 'parsers-ts/build/ParserCombinators';
-import { str, digits, spaces, word } from 'parsers-ts/build/ParserCreators';
-import { Parser } from 'parsers-ts/build/Parser';
+import {
+	Parser,
+	str, spaces,
+	sequenceOf,
+	uint
+} from 'parsers-ts';
 import { Timestamp } from './Timestamp';
+import { tuple } from 'parsers-ts';
 
 interface Command {
 	description: string;
@@ -21,7 +25,7 @@ const comma = sequenceOf(tuple(str(','), spaces), 1);
 // Example of types object
 const types: Map<string, Parser<any>> = new Map(
 	Object.entries({
-		timestamp: sequenceOf([digits, colon, digits, colon, digits])
+		timestamp: sequenceOf(tuple(uint, colon, uint, colon, uint))
 			.map((result) => new Timestamp(result[0], result[2], result[4]))
 			.mapError(
 				(targetString, index) =>
