@@ -28,10 +28,7 @@ const types: Map<string, Parser<any>> = new Map(
 		timestamp: sequenceOf(tuple(uint, colon, uint, colon, uint))
 			.map((result) => new Timestamp(result[0], result[2], result[4]))
 			.mapError(
-				(targetString, index) =>
-					`Invalid timestamp format at index ${index}: got '${targetString.slice(
-						index
-					)}', should be hh:mm:ss`
+				(targetString, index) => `Invalid timestamp format at index ${index}: got '${targetString.slice(index)}', should be hh:mm:ss`
 			)
 	})
 );
@@ -40,6 +37,7 @@ const types: Map<string, Parser<any>> = new Map(
  * syntax: `T1, T2, [T3]`;
  *
  * Syntax Parser Generator:
+ * getArgParser => word.map(result => types.get(result))
  * manyJoin(getArgParser, comma).run(syntax) => [pT1, pT2, pT3] (argParsers)
  * join([pT1, pT2, pT3], spaces)
  */
