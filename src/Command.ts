@@ -16,7 +16,7 @@ interface Arg {
 }
 
 const colon = str(':');
-const comma = sequenceOf([str(','), spaces], 1);
+const comma = sequenceOf(tuple(str(','), spaces), 1);
 
 // Example of types object
 const types: Map<string, Parser<any>> = new Map(

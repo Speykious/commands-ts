@@ -1,7 +1,7 @@
 import {
 	Parser, ParserState,
-	word, spaces, str, digits, 
-	sequenceOf, choice, manyJoin, between
+	word, spaces, str, 
+	sequenceOf, choice, manyJoin, between, tuple, uint
 } from 'parsers-ts';
 
 import { colors } from './colors';
@@ -9,11 +9,11 @@ import { colors } from './colors';
 const colon = str(':');
 const parsers: Map<string, Parser<any>> = new Map(
 	Object.entries({
-		timestamp: sequenceOf([digits, colon, digits, colon, digits]).map(
+		timestamp: sequenceOf(tuple(uint, colon, uint, colon, uint)).map(
 			(result) => ({
-				hours: Number(result[0]),
-				minutes: Number(result[2]),
-				seconds: Number(result[4])
+				hours: result[0],
+				minutes: result[2],
+				seconds: result[4]
 			})
 		)
 	})
@@ -35,9 +35,7 @@ const getArgumentParser = (arg: Arg) => {
 	return new Parser((inputState) => {
 		let nextState = (parsers
 			.get(arg.type)
-			.map((result) => ({ [arg.name]: result })) as Parser<{
-			[x: string]: any;
-		}>)
+			.map((result) => ({ [arg.name]: result })))
 			.mapError(
 				(targetString, index) =>
 					`Invalid \`${arg.name}\` argument at index ${index}`
@@ -67,7 +65,7 @@ const getArgumentParsers = async (args: Arg[]) => {
 // PS after code: will fail by means of the parser not parsing the entire syntax
 // Get a parser out of it that will parse the arguments of the command
 const getSyntaxParser = async (syntax: string) => {
-	const reqse = sequenceOf([word, colon, word]).map((result) => ({
+	const reqse = sequenceOf(tuple(word, colon, word)).map((result) => ({
 		type: result[0],
 		name: result[2]
 	})) as Parser<Arg>;
@@ -78,7 +76,7 @@ const getSyntaxParser = async (syntax: string) => {
 	)(
 		reqse.chain((result) => {
 			if (parsers.has(result.type))
-				return sequenceOf([str('='), parsers.get(result.type)]).map(
+				return sequenceOf(tuple(str('='), parsers.get(result.type))).map(
 					(value) => ({
 						...result,
 						default: value[1]
@@ -87,7 +85,7 @@ const getSyntaxParser = async (syntax: string) => {
 		})
 	);
 
-	const sep = sequenceOf([str(','), spaces], 1);
+	const sep = sequenceOf(tuple(str(','), spaces), 1);
 
 	const syntaxers: {
 		required: Parser<{ [x: string]: any }>[];
@@ -104,7 +102,7 @@ const getSyntaxParser = async (syntax: string) => {
 			requiredState.result.length &&
 			requiredState.index < requiredState.targetString.length
 		)
-			optionaler = sequenceOf([sep, optionaler]).map((result) => result[1]);
+			optionaler = sequenceOf(tuple(sep, optionaler)).map((result) => result[1]);
 		const optionalState = optionaler.transformer(requiredState);
 		console.log(optionalState);
 		if (requiredState.error) throw `Required argument: ${requiredState.error}`;
