@@ -1,13 +1,10 @@
-import { word, spaces, str, digits } from 'parsers-ts/build/ParserCreators';
-import { colors } from './colors';
 import {
-	sequenceOf,
-	choice,
-	manyJoin,
-	between
-} from 'parsers-ts/build/ParserCombinators';
-import { Parser } from 'parsers-ts/build/Parser';
-import { ParserState } from 'parsers-ts/build/ParserState';
+	Parser, ParserState,
+	word, spaces, str, digits, 
+	sequenceOf, choice, manyJoin, between
+} from 'parsers-ts';
+
+import { colors } from './colors';
 
 const colon = str(':');
 const parsers: Map<string, Parser<any>> = new Map(
