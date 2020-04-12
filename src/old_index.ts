@@ -44,7 +44,7 @@ const getArgumentParser = (arg: Arg) => {
 
 		if (!arg.default || !nextState.error) return nextState;
 
-		return { ...nextState, result: { [arg.name]: arg.default }, error: null };
+		return nextState.resultify({ [arg.name]: arg.default });
 	});
 };
 
@@ -115,36 +115,24 @@ const getSyntaxParser = async (syntax: string) => {
 
 		return Promise.resolve(
 			new Parser((inputState) => {
-				const nextState = ((sequenceOf(syntaxers.required) as Parser<
-					{ [x: string]: any }[]
-				>).chain((reqs) =>
-					(sequenceOf(syntaxers.optional, 0) as Parser<
-						{ [x: string]: any }[]
-					>).map(
-						(opts) =>
-							new Map([
-								...reqs.map((req) => Object.entries(req)[0]),
-								...opts.map((opt) => Object.entries(opt)[0])
-							])
+				const nextState = (sequenceOf(syntaxers.required)
+				.chain((reqs) =>
+					sequenceOf(syntaxers.optional, 0)
+					.map((opts) =>
+						new Map([
+							...reqs.map((req) => Object.entries(req)[0]),
+							...opts.map((opt) => Object.entries(opt)[0])
+						])
 					)
-				) as Parser<Map<string, any>>).transformer(inputState);
+				)).transformer(inputState);
 
 				if (syntax.length < optionalState.targetString.length)
-					return ParserState.errorify(
-						nextState,
-						(targetString, index) =>
-							`The syntax wasn't fully parsed at index ${index} (remaining: '${syntax.slice(
-								index
-							)}')`
-					);
+					return nextState.errorify(`The syntax wasn't fully parsed at index ${nextState.index} (remaining: '${syntax.slice(nextState.index)}')`);
 
 				if (nextState.index < nextState.targetString.length)
-					return ParserState.errorify(
-						nextState,
+					return nextState.errorify(
 						(targetString, index) =>
-							`Too many arguments: '${shiftSpaces(
-								targetString.slice(index)
-							)}' is remaining`
+							`Too many arguments: '${shiftSpaces(targetString.slice(index))}' is remaining`
 					);
 
 				return nextState;
