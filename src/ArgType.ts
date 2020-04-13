@@ -10,3 +10,5 @@ export interface ArgType<T> {
 	/** The parser of the argument type. */
 	parser: Parser<T>
 }
+
+export type ArgTypeTuple<T extends any[]> = { [K in keyof T]: ArgType<T[K]> };

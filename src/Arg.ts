@@ -1,4 +1,4 @@
-import { ArgType } from './ArgType'
+import { ArgType, ArgTypeTuple } from './ArgType'
 import { choice } from 'parsers-ts'
 
 /** A set of required and optional properties used to build a new Argument object. */
@@ -25,7 +25,7 @@ export interface ArgInfo {
 	}
 	/** If the type is 'word', 'text', 'int' or 'float',
 	 * this option will restrain you to a set of predetermined values. */
-	oneOf?: (string|number)[]
+	oneOf?: any[]
 	/** The min value of the length of the string if the type is 'word' or 'text'.
 	 * The min value of the number if the type is 'int' or 'float'. */
 	min?: number
@@ -34,14 +34,15 @@ export interface ArgInfo {
 	max?: number
 }
 
-const getType = (types: ArgType<any>[], name: string) => {
+/** Searches for an argument type by name in a given list. */
+const getType = <T extends any[]>(types: ArgTypeTuple<T>, name: string) => {
 	const filtered = types.filter(type => type.name === name)
 	if (filtered.length > 1)
 		throw `Two or more argument types have the same name: '${name}'`
 	else if (filtered.length < 1)
 		throw `No argument with name '${name}' has been found`
 	
-	return filtered[0]
+	return filtered[0] as ArgType<T[number]>
 }
 
 /** A class that represents an argument that is gonna be used in commands. */
@@ -57,22 +58,68 @@ export class Arg<T> {
 	 * and optional if there isn't. */
 	public default?: T
 
-	constructor(types: ArgType<any>[], info: ArgInfo) {
+	/** Creates an Arg<T> object. */
+	constructor(types: ArgTypeTuple<any[]>, info: ArgInfo) {
 		this.label = info.label
 		this.description = info.description
 		if (info.default) this.default = info.default
 
 		if (typeof info.type === 'string') {
+			// Managing single types here
 			this.type = getType(types, info.type)
 
-			// Code for info.oneOf, info.min and info.max
+			if (/^(word|text|int|float)$/.test(info.type)) {
+				if (info.oneOf) {
+					// Special facilitator: oneOf, to choose from different predetermined
+					if (info.min || info.max) throw `min/max options are incompatible with oneOf`
+					this.type.parser = this.type.parser.filter(
+						result => isOneOf(result, info.oneOf),
+						() => `Argument has to be one of the following values: ${
+							info.oneOf.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')
+						}`
+					)
+				} else {
+					// Special facilitators: min and max, to make a range of values or character lengths
+					if (info.min) {	// For minimum value
+						if (/^(word|text)$/.test(info.type)) {
+							this.type.parser = this.type.parser.filter(
+								result => (result+'').length >= info.min,
+								() => `Argument must have a minimum of ${info.min} characters`
+							)
+						} else {
+							this.type.parser = this.type.parser.filter(
+								result => Number(result) >= info.min,
+								() => `Argument must be equal to or greater than ${info.min}`
+							)
+						}
+					}
+					if (info.max) {	// For maximum value
+						if (/^(word|text)$/.test(info.type)) {
+							this.type.parser = this.type.parser.filter(
+								result => (result+'').length <= info.max,
+								() => `Argument must have a maximum of ${info.max} characters`
+							)
+						} else {
+							this.type.parser = this.type.parser.filter(
+								result => Number(result) <= info.max,
+								() => `Argument must be equal to or less than ${info.max}`
+							)
+						}
+					}
+				} 
+			}
+
 		} else {
-			const filtered: ArgType<any>[] = [];
+			// Managing union types here
+			if (info.oneOf) throw `The oneOf option is incompatible with union types`
+			if (info.min || info.max) throw `min/max options are incompatible with union types`
+
+			const filtered: ArgTypeTuple<any[]> = []
 			for (let name of info.type)
 				filtered.push(getType(types, name))
 			
 			this.type = {
-				name: info.type.join('|'),
+				name: info.type.join('-'),
 				description: filtered.map(
 					argt => `${argt.name} -> ${argt.description}`
 				).join('\n'),
@@ -81,6 +128,23 @@ export class Arg<T> {
 			}
 		}
 
-		// Code for info.error and info.filter
+		// Managing error and filter options
+		if (info.error)
+			this.type.parser = this.type.parser.mapError(
+				() => info.error
+			)
+		
+		if (info.filter)
+			this.type.parser = this.type.parser.filter(
+				info.filter.fn, () => info.filter.error
+			)
+	}
+
+	async parse(targetString: string) {
+		try {
+			return Promise.resolve(this.type.parser.run(targetString))
+		} catch (err) {
+			return Promise.reject(err)
+		}
 	}
 }
