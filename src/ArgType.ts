@@ -11,4 +11,21 @@ export interface ArgType<T> {
 	parser: Parser<T>
 }
 
-export type ArgTypeTuple<T extends any[]> = { [K in keyof T]: ArgType<T[K]> };
+/** Literally a list of argument types with one more function that helps to find types. */
+export class ArgTypeTuple<T extends any[]> extends Array<ArgType<T[number]>> {
+	/** Creates an ArgTypeTuple object. */
+	constructor(...types: ArgType<T[number]>[]) {
+		super(...types)
+	}
+
+	/** Searches for an argument type by name in a given list. */
+	getType(name: string) {
+		const filtered = this.filter(type => type.name === name)
+		if (filtered.length > 1)
+			throw `Two or more argument types have the same name: '${name}'`
+		else if (filtered.length < 1)
+			throw `No argument with name '${name}' has been found`
+		
+		return filtered[0] as ArgType<T[number]>
+	}
+}

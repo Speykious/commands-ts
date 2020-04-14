@@ -34,17 +34,6 @@ export interface ArgInfo {
 	max?: number
 }
 
-/** Searches for an argument type by name in a given list. */
-const getType = <T extends any[]>(types: ArgTypeTuple<T>, name: string) => {
-	const filtered = types.filter(type => type.name === name)
-	if (filtered.length > 1)
-		throw `Two or more argument types have the same name: '${name}'`
-	else if (filtered.length < 1)
-		throw `No argument with name '${name}' has been found`
-	
-	return filtered[0] as ArgType<T[number]>
-}
-
 /** A class that represents an argument that is gonna be used in commands. */
 export class Arg<T> {
 	/** The label of the argument. */
@@ -66,7 +55,7 @@ export class Arg<T> {
 
 		if (typeof info.type === 'string') {
 			// Managing single types here
-			this.type = getType(types, info.type)
+			this.type = types.getType(info.type)
 
 			if (/^(word|text|int|float)$/.test(info.type)) {
 				if (info.oneOf) {
@@ -114,9 +103,9 @@ export class Arg<T> {
 			if (info.oneOf) throw `The oneOf option is incompatible with union types`
 			if (info.min || info.max) throw `min/max options are incompatible with union types`
 
-			const filtered: ArgTypeTuple<any[]> = []
+			const filtered: ArgTypeTuple<any[]> = new ArgTypeTuple()
 			for (let name of info.type)
-				filtered.push(getType(types, name))
+				filtered.push(types.getType(name))
 			
 			this.type = {
 				name: info.type.join('-'),
