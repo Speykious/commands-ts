@@ -136,6 +136,37 @@ test('Argument object: ranged integers', async () => {
 	expect(n5.result).toBe(-2)
 })
 
+test('Argument object: ranged length of characters', async () => {
+	const arg = new Arg<string>(myTypes, {
+		label: 'limited-text',
+		description: `A ranged integer this time`,
+		type: 'text',
+		min: 10,
+		max: 50
+	})
+
+	expect(arg.label).toBe('limited-text')
+	expect(arg.type).toBe(myTypes[1])
+
+	const n1 = await arg.parse('abc')
+	const n2 = await arg.parse('"abc"')
+	const n3 = await arg.parse('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
+	const n4 = await arg.parse('Hello world!')
+	const n5 = await arg.parse('"Omae wa mou shindeiru."')
+
+	expect(n1.error).toBe(`Argument must have a minimum of 10 characters`)
+	expect(n2.error).toBe(`Argument must have a minimum of 10 characters`)
+	expect(n3.error).toBe(`Argument must have a maximum of 50 characters`)
+	expect(n4.error).toBe(null)
+	expect(n5.error).toBe(null)
+
+	expect(n1.result).toBe(null)
+	expect(n2.result).toBe(null)
+	expect(n3.result).toBe(null)
+	expect(n4.result).toBe('Hello world!')
+	expect(n5.result).toBe('Omae wa mou shindeiru.')
+})
+
 test('Argument object: one of several texts to choose from', async () => {
 	const arg = new Arg<string>(myTypes, {
 		label: 'hello-text',
@@ -153,7 +184,6 @@ test('Argument object: one of several texts to choose from', async () => {
 	const guess4 = await arg.parse('`shindeiru.` \'other unrelated thing\'')
 
 	expect(guess1.error).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru."`)
-	console.log(Parser.void.run('ZA WARUDO'))
 	expect(guess2.error).toBe(null)
 	expect(guess3.error).toBe(null)
 	expect(guess4.error).toBe(null)
@@ -162,4 +192,30 @@ test('Argument object: one of several texts to choose from', async () => {
 	expect(guess2.result).toBe('hello!')
 	expect(guess3.result).toBe('ZA WARUDO')
 	expect(guess4.result).toBe('shindeiru.')
+})
+
+test('Argument object: incompatibility between oneOf and min/max', async () => {
+	try {
+		new Arg<string>(myTypes, {
+			label: 'impossible',
+			description: `This argument cannot exist.`,
+			type: 'word',
+			min: 3,
+			oneOf: ['what', 'the', '...']
+		})
+	} catch (err) {
+		expect(err).toBe(`min/max options are incompatible with oneOf`)
+	}
+
+	try {
+		new Arg<string>(myTypes, {
+			label: 'impossible2',
+			description: `This second argument cannot exist.`,
+			type: 'word',
+			max: 10,
+			oneOf: ['what', 'the', '???']
+		})
+	} catch (err) {
+		expect(err).toBe(`min/max options are incompatible with oneOf`)
+	}
 })
