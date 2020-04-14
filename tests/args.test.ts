@@ -1,6 +1,11 @@
-import {} from '../src/Arg'
+import { Arg } from '../src/Arg'
 import { ArgTypeTuple } from '../src/ArgType'
-import { Parser, word, choice, between, str } from 'parsers-ts'
+import { Parser, word, choice, between, str, reg } from 'parsers-ts'
+
+const betweenQuotes = (qc: string) =>
+	between(str(qc), str(qc))(
+		reg(new RegExp(`^${qc}((.*?)[^\\\\])?${qc}`))
+	)
 
 const myTypes = new ArgTypeTuple(
 	{
@@ -14,9 +19,9 @@ const myTypes = new ArgTypeTuple(
 		label: name,
 		description: `Either a string between quotes \`"\`, single-quotes \`'\` or backticks \`\`\`, or if none, will take the rest of all the command instruction.`,
 		parser: choice(
-			between(str(`'`), str(`'`))(Parser.void),
-			between(str(`"`), str(`"`))(Parser.void),
-			between(str('`'), str('`'))(Parser.void),
+			betweenQuotes(`'`),
+			betweenQuotes(`"`),
+			betweenQuotes('`'),
 			Parser.void
 		).mapError(() => `Argument is not a text (how is that even possible???)`)
 	},
@@ -52,4 +57,108 @@ test('Get types from ArgTypeTuple', () => {
 	expect(myTypes.getType('text')).toBe(myTypes[1])
 	expect(myTypes.getType('int')).toBe(myTypes[2])
 	expect(myTypes.getType('float')).toBe(myTypes[3])
+})
+
+// Make different tests, each with a separate Arg object to expect things out of
+
+test('Argument object: simple-word', async () => {
+	const arg = new Arg<string>(myTypes, {
+		label: 'simple-word',
+		description: `Just a simple word`,
+		type: 'word'
+	})
+
+	expect(arg.default).toBe(undefined)
+	expect(arg.label).toBe('simple-word')
+	expect(arg.type).toBe(myTypes[0])
+
+	const yes = await arg.parse('yes-yes no')
+	expect(yes.result).toBe('yes')
+	expect(yes.error).toBe(null)
+
+	const wut = await arg.parse('yes-yes no', 3)
+	expect(wut.result).toBe(null)
+})
+
+test('Argument object: integers', async () => {
+	const arg = new Arg<string>(myTypes, {
+		label: 'simple-integer',
+		description: `Just a simple integer`,
+		type: 'int',
+		default: 3
+	})
+
+	expect(arg.default).toBe(3)
+	expect(arg.label).toBe('simple-integer')
+	expect(arg.type).toBe(myTypes[2])
+
+	const n1 = await arg.parse('123 456')
+	const n2 = await arg.parse('+4069')
+	const n3 = await arg.parse('-666')
+
+	expect(n1.error).toBe(null)
+	expect(n2.error).toBe(null)
+	expect(n3.error).toBe(null)
+
+	expect(n1.result).toBe(123)
+	expect(n2.result).toBe(4069)
+	expect(n3.result).toBe(-666)
+})
+
+test('Argument object: ranged integers', async () => {
+	const arg = new Arg<string>(myTypes, {
+		label: 'ranged-integer',
+		description: `A ranged integer this time`,
+		type: 'int',
+		min: -30,
+		max: 50
+	})
+
+	expect(arg.label).toBe('ranged-integer')
+	expect(arg.type).toBe(myTypes[2])
+
+	const n1 = await arg.parse('123')
+	const n2 = await arg.parse('-654')
+	const n3 = await arg.parse('18')
+	const n4 = await arg.parse('+0')
+	const n5 = await arg.parse('-2')
+
+	expect(n1.error).toBe(`Argument must be equal to or less than 50`)
+	expect(n2.error).toBe(`Argument must be equal to or greater than -30`)
+	expect(n3.error).toBe(null)
+	expect(n4.error).toBe(null)
+	expect(n5.error).toBe(null)
+
+	expect(n1.result).toBe(null)
+	expect(n2.result).toBe(null)
+	expect(n3.result).toBe(18)
+	expect(n4.result).toBe(0)
+	expect(n5.result).toBe(-2)
+})
+
+test('Argument object: one of several texts to choose from', async () => {
+	const arg = new Arg<string>(myTypes, {
+		label: 'hello-text',
+		description: `Is it hello or world?`,
+		type: 'text',
+		oneOf: ['hello!', 'hello world!', 'ZA WARUDO', 'shindeiru.']
+	})
+
+	expect(arg.label).toBe('hello-text')
+	expect(arg.type).toBe(myTypes[1])
+
+	const guess1 = await arg.parse('hello!...')
+	const guess2 = await arg.parse('"hello!"...')
+	const guess3 = await arg.parse('ZA WARUDO')
+	const guess4 = await arg.parse('`shindeiru.` \'other unrelated thing\'')
+
+	expect(guess1.error).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru."`)
+	expect(guess2.error).toBe(null)
+	expect(guess3.error).toBe(null)
+	expect(guess4.error).toBe(null)
+
+	expect(guess1.result).toBe(null)
+	expect(guess2.result).toBe('hello!')
+	expect(guess3.result).toBe('ZA WARUDO')
+	expect(guess4.result).toBe('shindeiru.')
 })

@@ -1,5 +1,6 @@
 import { ArgType, ArgTypeTuple } from './ArgType'
-import { choice } from 'parsers-ts'
+import { choice, ParserState } from 'parsers-ts'
+import { isOneOf } from './utils'
 
 /** A set of required and optional properties used to build a new Argument object. */
 export interface ArgInfo {
@@ -129,9 +130,13 @@ export class Arg<T> {
 			)
 	}
 
-	async parse(targetString: string) {
+	async parse(targetString: string, index: number = 0) {
 		try {
-			return Promise.resolve(this.type.parser.run(targetString))
+			return Promise.resolve(
+				this.type.parser.transformer(
+					new ParserState(targetString, index)
+				)
+			)
 		} catch (err) {
 			return Promise.reject(err)
 		}
