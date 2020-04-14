@@ -8,7 +8,7 @@ exports.pad = (n, width, z = '0') => {
         return new Array(width - n.length + 1).join(z) + n;
 };
 exports.shiftSpaces = (s) => {
-    let match = s.match(/^\s+/);
+    const match = s.match(/^\s+/);
     if (match)
         s = s.slice(match[0].length);
     return s;
