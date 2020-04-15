@@ -27,6 +27,6 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "parsers-ts": "^3.3.2"
+    "parsers-ts": "^3.3.3"
   }
 }

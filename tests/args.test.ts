@@ -1,6 +1,7 @@
 import { Arg } from '../src/Arg'
 import { ArgTypeTuple } from '../src/ArgType'
 import { Parser, word, choice, between, str, reg } from 'parsers-ts'
+import { isOneOf } from '../src/utils'
 
 const betweenQuotes = (qc: string) =>
 	between(str(qc), str(qc))(
@@ -183,7 +184,10 @@ test('Argument object: one of several texts to choose from', async () => {
 	const guess3 = await arg.parse('ZA WARUDO')
 	const guess4 = await arg.parse('`shindeiru.` \'other unrelated thing\'')
 
-	expect(guess1.error).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru."`)
+	console.log(guess1)
+	expect(guess1.error).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru.", recieved "hello!..." instead`)
+	
+
 	expect(guess2.error).toBe(null)
 	expect(guess3.error).toBe(null)
 	expect(guess4.error).toBe(null)

@@ -63,10 +63,13 @@ export class Arg<T> {
 					// Special facilitator: oneOf, to choose from different predetermined
 					if (info.min || info.max) throw `min/max options are incompatible with oneOf`
 					this.type.parser = this.type.parser.filter(
-						result => isOneOf(result, info.oneOf),
-						() => `Argument has to be one of the following values: ${
+						result => {
+							console.log(`filtering: ${isOneOf(result, info.oneOf)}`)
+							return isOneOf(result, info.oneOf)
+						},
+						(targetString, index) => `Argument has to be one of the following values: ${
 							info.oneOf.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')
-						}`
+						}, recieved "${targetString.slice(index)}" instead`
 					)
 				} else {
 					// Special facilitators: min and max, to make a range of values or character lengths
