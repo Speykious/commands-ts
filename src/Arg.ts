@@ -1,4 +1,4 @@
-import { ArgType, ArgTypeTuple } from './ArgType'
+import { ArgType, ArgTypeTuple, changeParser } from './ArgType'
 import { choice, ParserState } from 'parsers-ts'
 import { isOneOf } from './utils'
 
@@ -62,41 +62,40 @@ export class Arg<T> {
 				if (info.oneOf) {
 					// Special facilitator: oneOf, to choose from different predetermined
 					if (info.min || info.max) throw `min/max options are incompatible with oneOf`
-					this.type.parser = this.type.parser.filter(
-						result => {
-							console.log(`filtering: ${isOneOf(result, info.oneOf)}`)
-							return isOneOf(result, info.oneOf)
-						},
-						(targetString, index) => `Argument has to be one of the following values: ${
-							info.oneOf.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')
-						}, recieved "${targetString.slice(index)}" instead`
+					this.type = changeParser(this.type,
+						this.type.parser.filter(
+							fresult => isOneOf(fresult, info.oneOf),
+							(targetString, index) => `Argument has to be one of the following values: ${
+								info.oneOf.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')
+							}, recieved "${targetString.slice(index)}" instead`
+						)
 					)
 				} else {
 					// Special facilitators: min and max, to make a range of values or character lengths
 					if (info.min) {	// For minimum value
 						if (/^(word|text)$/.test(info.type)) {
-							this.type.parser = this.type.parser.filter(
+							this.type = changeParser(this.type, this.type.parser.filter(
 								result => (result+'').length >= info.min,
 								() => `Argument must have a minimum of ${info.min} characters`
-							)
+							))
 						} else {
-							this.type.parser = this.type.parser.filter(
+							this.type = changeParser(this.type, this.type.parser.filter(
 								result => Number(result) >= info.min,
 								() => `Argument must be equal to or greater than ${info.min}`
-							)
+							))
 						}
 					}
 					if (info.max) {	// For maximum value
 						if (/^(word|text)$/.test(info.type)) {
-							this.type.parser = this.type.parser.filter(
+							this.type = changeParser(this.type, this.type.parser.filter(
 								result => (result+'').length <= info.max,
 								() => `Argument must have a maximum of ${info.max} characters`
-							)
+							))
 						} else {
-							this.type.parser = this.type.parser.filter(
+							this.type = changeParser(this.type, this.type.parser.filter(
 								result => Number(result) <= info.max,
 								() => `Argument must be equal to or less than ${info.max}`
-							)
+							))
 						}
 					}
 				} 
@@ -123,13 +122,17 @@ export class Arg<T> {
 
 		// Managing error and filter options
 		if (info.error)
-			this.type.parser = this.type.parser.mapError(
-				() => info.error
+			this.type = changeParser(this.type,
+				this.type.parser.mapError(
+					() => info.error
+				)
 			)
 		
 		if (info.filter)
-			this.type.parser = this.type.parser.filter(
-				info.filter.fn, () => info.filter.error
+			this.type = changeParser(this.type,
+				this.type.parser.filter(
+					info.filter.fn, () => info.filter.error
+				)
 			)
 	}
 

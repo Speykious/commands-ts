@@ -11,6 +11,12 @@ export interface ArgType<T> {
 	parser: Parser<T>
 }
 
+export const changeParser = <T>(type: ArgType<T>, newParser: Parser<T>) => {
+	const newType = { ...type }
+	newType.parser = newParser
+	return newType
+}
+
 /** Literally a list of argument types with one more function that helps to find types. */
 export class ArgTypeTuple<T extends any[]> extends Array<ArgType<T[number]>> {
 	/** Creates an ArgTypeTuple object. */

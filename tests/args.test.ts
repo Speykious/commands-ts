@@ -5,7 +5,7 @@ import { isOneOf } from '../src/utils'
 
 const betweenQuotes = (qc: string) =>
 	between(str(qc), str(qc))(
-		reg(new RegExp(`^((.*?)[^\\\\])?(?=${qc})`))
+		reg(new RegExp(`^[^${qc}]*`))
 	)
 
 const myTypes = new ArgTypeTuple(
@@ -20,8 +20,8 @@ const myTypes = new ArgTypeTuple(
 		label: name,
 		description: `Either a string between quotes \`"\`, single-quotes \`'\` or backticks \`\`\`, or if none, will take the rest of all the command instruction.`,
 		parser: choice(
-			betweenQuotes(`'`),
-			betweenQuotes(`"`),
+			betweenQuotes("'"),
+			betweenQuotes('"'),
 			betweenQuotes('`'),
 			Parser.void
 		).mapError(() => `Argument is not a text (how is that even possible???)`)
@@ -150,23 +150,24 @@ test('Argument object: ranged length of characters', async () => {
 	expect(arg.type).toBe(myTypes[1])
 
 	const n1 = await arg.parse('abc')
-	const n2 = await arg.parse('"abc"')
+	const n2 = await arg.parse('"hello world!"...')
 	const n3 = await arg.parse('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
 	const n4 = await arg.parse('Hello world!')
 	const n5 = await arg.parse('"Omae wa mou shindeiru."')
 
 	expect(n1.error).toBe(`Argument must have a minimum of 10 characters`)
-	expect(n2.error).toBe(`Argument must have a minimum of 10 characters`)
+	expect(n2.error).toBe(null)
 	expect(n3.error).toBe(`Argument must have a maximum of 50 characters`)
 	expect(n4.error).toBe(null)
 	expect(n5.error).toBe(null)
 
 	expect(n1.result).toBe(null)
-	expect(n2.result).toBe(null)
+	expect(n2.result).toBe('hello world!')
 	expect(n3.result).toBe(null)
 	expect(n4.result).toBe('Hello world!')
 	expect(n5.result).toBe('Omae wa mou shindeiru.')
 })
+
 
 test('Argument object: one of several texts to choose from', async () => {
 	const arg = new Arg<string>(myTypes, {
@@ -177,17 +178,13 @@ test('Argument object: one of several texts to choose from', async () => {
 	})
 
 	expect(arg.label).toBe('hello-text')
-	expect(arg.type).toBe(myTypes[1])
 
 	const guess1 = await arg.parse('hello!...')
 	const guess2 = await arg.parse('"hello!"...')
 	const guess3 = await arg.parse('ZA WARUDO')
 	const guess4 = await arg.parse('`shindeiru.` \'other unrelated thing\'')
-
-	console.log(guess1)
-	expect(guess1.error).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru.", recieved "hello!..." instead`)
 	
-
+	expect(guess1.error).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru.", recieved "hello!..." instead`)
 	expect(guess2.error).toBe(null)
 	expect(guess3.error).toBe(null)
 	expect(guess4.error).toBe(null)
@@ -196,7 +193,9 @@ test('Argument object: one of several texts to choose from', async () => {
 	expect(guess2.result).toBe('hello!')
 	expect(guess3.result).toBe('ZA WARUDO')
 	expect(guess4.result).toBe('shindeiru.')
+	
 })
+
 
 test('Argument object: incompatibility between oneOf and min/max', async () => {
 	try {
