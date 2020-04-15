@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "CommonJS",
-		"outDir": "build",
+		"outDir": "lib",
 		"rootDir": "src",
 
 		// "inlineSourceMap": true,
@@ -10,7 +10,7 @@
 		"declaration": true,
 
 		"types": ["node", "jest"],
-		"typeRoots": ["node_modules/@types", "build"]
+		"typeRoots": ["node_modules/@types", "lib"]
 	},
 
 	"exclude": ["node_modules/*"],
