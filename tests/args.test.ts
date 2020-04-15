@@ -116,7 +116,9 @@ test('Argument object: ranged integers', async () => {
 	})
 
 	expect(arg.label).toBe('ranged-integer')
-	expect(arg.type).toBe(myTypes[2])
+	expect(arg.type.name).toBe(myTypes[2].name)
+	expect(arg.type.description).toBe(myTypes[2].description)
+	expect(arg.type.label).toBe(myTypes[2].label)
 
 	const n1 = await arg.parse('123')
 	const n2 = await arg.parse('-654')
@@ -147,22 +149,24 @@ test('Argument object: ranged length of characters', async () => {
 	})
 
 	expect(arg.label).toBe('limited-text')
-	expect(arg.type).toBe(myTypes[1])
+	expect(arg.type.name).toBe(myTypes[1].name)
+	expect(arg.type.description).toBe(myTypes[1].description)
+	expect(arg.type.label).toBe(myTypes[1].label)
 
 	const n1 = await arg.parse('abc')
-	const n2 = await arg.parse('"hello world!"...')
+	const n2 = await arg.parse('"hello!" and then more characters')
 	const n3 = await arg.parse('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
 	const n4 = await arg.parse('Hello world!')
 	const n5 = await arg.parse('"Omae wa mou shindeiru."')
 
 	expect(n1.error).toBe(`Argument must have a minimum of 10 characters`)
-	expect(n2.error).toBe(null)
+	expect(n2.error).toBe(`Argument must have a minimum of 10 characters`)
 	expect(n3.error).toBe(`Argument must have a maximum of 50 characters`)
 	expect(n4.error).toBe(null)
 	expect(n5.error).toBe(null)
 
 	expect(n1.result).toBe(null)
-	expect(n2.result).toBe('hello world!')
+	expect(n2.result).toBe(null)
 	expect(n3.result).toBe(null)
 	expect(n4.result).toBe('Hello world!')
 	expect(n5.result).toBe('Omae wa mou shindeiru.')
@@ -193,7 +197,6 @@ test('Argument object: one of several texts to choose from', async () => {
 	expect(guess2.result).toBe('hello!')
 	expect(guess3.result).toBe('ZA WARUDO')
 	expect(guess4.result).toBe('shindeiru.')
-	
 })
 
 
