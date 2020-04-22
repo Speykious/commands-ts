@@ -51,6 +51,7 @@ export class Option {
 					}
 				else return {
 					info: `Argument n°${from.error.nparser} from option "${this.name}" is invalid`,
+					argInfo: from.error.info,
 					narg: from.error.nparser,
 					option: this.name
 				}

@@ -25,7 +25,7 @@ test('Options: without arguments - professeur', () => {
 	expect(short3.result).toBe(true)
 })
 
-test('Options: with arguments - answer', () => {
+test('Options: with one argument - answer', () => {
 	const opProf = new Option(defaultTypes, {
 		name: 'answer',
 		description: `To answer yes, or no.`,
@@ -69,4 +69,64 @@ test('Options: with arguments - answer', () => {
 	expect(short2.result).toBe(null)
 	expect(short3.result).toEqual(['yes'])
 	expect(short4.result).toBe(null)
+})
+
+test('Options: with multiple arguments - answer', () => {
+	const quizz = new Option(defaultTypes, {
+		name: 'Quizz',
+		description: `Answer 4 questions!`,
+		short: 'Q',
+		arguments: [
+			{
+				label: 'meth',
+				description: '1 + 1 = 3.',
+				type: 'word',
+				oneOf: ['true', 'false'],
+				error: `U hav to say tru or fals`
+			},
+			{
+				label: 'maths',
+				description: '1 + 1 = ?',
+				type: 'int',
+				filter: {
+					fn: result => result === 2,
+					error: `Wrong answer. It was 2!`
+				}
+			},
+			{
+				label: 'culprit',
+				description: 'Who was the culprit?',
+				type: 'word',
+				oneOf: ['Kuriminaru'],
+				error: `Wrong... The culprit was Kuriminaru!!`
+			},
+			{
+				label: 'japanese',
+				description: 'What does 九千九百九十九 mean?',
+				type: 'word',
+				oneOf: ['9999'],
+				error: `Wroooong. It means 9999!!`
+			},
+		]
+	})
+
+	const long_alright = quizz.parse(`--Quizz false 2 Kuriminaru 9999`)
+	const long_false1 = quizz.parse(`--Quizz neither 2 Kuriminaru 9999`)
+	const long_false2 = quizz.parse(`--Quizz false 5 Kuriminaru 9999`)
+	const long_false3 = quizz.parse(`--Quizz neither 2 Innosento 9999`)
+	const long_false4 = quizz.parse(`--Quizz neither 2 Kuriminaru banana`)
+
+	console.log(long_false1, long_false2)
+	
+	expect(long_alright.error).toBe(null)
+	expect(long_false1.error.info).toBe('Argument n°1 from option "Quizz" is invalid')
+	expect(long_false2.error.info).toBe('Argument n°2 from option "Quizz" is invalid')
+	expect(long_false3.error.info).toBe('Argument n°3 from option "Quizz" is invalid')
+	expect(long_false4.error.info).toBe('Argument n°4 from option "Quizz" is invalid')
+
+	expect(long_alright.result).toEqual(['false', 2, 'Kuriminaru', '9999'])
+	expect(long_false1.result).toBe(null)
+	expect(long_false2.result).toBe(null)
+	expect(long_false3.result).toBe(null)
+	expect(long_false4.result).toBe(null)
 })
