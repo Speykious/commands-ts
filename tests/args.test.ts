@@ -128,8 +128,8 @@ test('Argument object: ranged integers', async () => {
 	const n4 = await arg.parse('+0')
 	const n5 = await arg.parse('-2')
 
-	expect(n1.error).toBe(`Argument must be equal to or less than 50`)
-	expect(n2.error).toBe(`Argument must be equal to or greater than -30`)
+	expect(n1.error.info).toBe(`Argument must be equal to or less than 50`)
+	expect(n2.error.info).toBe(`Argument must be equal to or greater than -30`)
 	expect(n3.error).toBe(null)
 	expect(n4.error).toBe(null)
 	expect(n5.error).toBe(null)
@@ -161,9 +161,9 @@ test('Argument object: ranged length of characters', async () => {
 	const n4 = await arg.parse('Hello world!')
 	const n5 = await arg.parse('"Omae wa mou shindeiru."')
 
-	expect(n1.error).toBe(`Argument must have a minimum of 10 characters`)
-	expect(n2.error).toBe(`Argument must have a minimum of 10 characters`)
-	expect(n3.error).toBe(`Argument must have a maximum of 50 characters`)
+	expect(n1.error.info).toBe(`Argument must have a minimum of 10 characters`)
+	expect(n2.error.info).toBe(`Argument must have a minimum of 10 characters`)
+	expect(n3.error.info).toBe(`Argument must have a maximum of 50 characters`)
 	expect(n4.error).toBe(null)
 	expect(n5.error).toBe(null)
 
@@ -190,7 +190,7 @@ test('Argument object: one of several texts to choose from', async () => {
 	const guess3 = await arg.parse('ZA WARUDO')
 	const guess4 = await arg.parse('`shindeiru.` \'other unrelated thing\'')
 	
-	expect(guess1.error).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru.", recieved "hello!..." instead`)
+	expect(guess1.error.info).toBe(`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru.", recieved "hello!..." instead`)
 	expect(guess2.error).toBe(null)
 	expect(guess3.error).toBe(null)
 	expect(guess4.error).toBe(null)
