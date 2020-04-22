@@ -1,6 +1,6 @@
 import { ArgInfo, Arg } from './Arg'
 import { ArgTypeTuple } from './ArgType'
-import { Parser, join, str, choice, spaces, ParserState } from 'parsers-ts'
+import { Parser, str, choice, spaces, ParserState, tuple, join } from 'parsers-ts'
 
 export interface OptionInfo {
 	/** The name of the option. */
@@ -39,16 +39,32 @@ export class Option {
 
 		if (this.arguments) {
 			this.arguments = info.arguments.map(argi => new Arg(types, argi))
-			this.parser = join([
+			this.parser = join(tuple(
 				this.parser,
 				...this.arguments.map(arg => arg.type.parser)
-			], spaces).map(result => result.slice(1) as Arg<unknown>[])
+			), spaces).map(result => result.slice(1) as Arg<unknown>[])
+			.mapError(from => {
+				if (from.error.nparser === 0)
+					return {
+						info: `Option "${this.name}" parsing failed`,
+						option: this.name
+					}
+				else return {
+					info: `Argument n°${from.error.nparser} from option "${this.name}" is invalid`,
+					narg: from.error.nparser,
+					option: this.name
+				}
+			})
 		} else {
 			this.parser = this.parser
-			.mapError(() => `Option name ("${this.name}") parsing failed`)
+			.mapError({
+				info: `Option "${this.name}" parsing failed`,
+				option: this.name
+			})
 		}
 	}
 
+	/** Option parser function. */
 	parse(targetString: string, index: number = 0) {
 		return this.parser.transformer(new ParserState(targetString, index))
 	}
