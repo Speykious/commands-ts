@@ -1,5 +1,5 @@
 import { ArgType, ArgTypeTuple, changeParser } from './ArgType'
-import { choice, ParserState } from 'parsers-ts'
+import { choice, ParserState, ErrorMsgProvider } from 'parsers-ts'
 import { isOneOf } from './utils'
 
 /** A set of required and optional properties used to build a new Argument object. */
@@ -18,11 +18,11 @@ export interface ArgInfo {
 	 * Cannot be null if defined. */
 	default?: any
 	/** The error text to show when the argument is invalid. */
-	error?: string
+	error?: ErrorMsgProvider
 	/** Filters the parsed argument result. */
 	filter?: {
 		fn: (result: any) => boolean
-		error: string
+		error: ErrorMsgProvider
 	}
 	/** If the type is 'word', 'text', 'int' or 'float',
 	 * this option will restrain you to a set of predetermined values. */
@@ -65,9 +65,16 @@ export class Arg<T> {
 					this.type = changeParser(this.type,
 						this.type.parser.filter(
 							fresult => isOneOf(fresult, info.oneOf),
-							(targetString, index) => `Argument has to be one of the following values: ${
-								info.oneOf.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')
-							}, recieved "${targetString.slice(index)}" instead`
+							from => {
+								const recieved = from.targetString.slice(from.index)
+								return {
+									info: `Argument has to be one of the following values: ${
+										info.oneOf.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')
+									}, recieved "${recieved}" instead`,
+									oneOf: info.oneOf,
+									arg: recieved
+								}
+							}
 						)
 					)
 				} else {
@@ -76,12 +83,21 @@ export class Arg<T> {
 						if (/^(word|text)$/.test(info.type)) {
 							this.type = changeParser(this.type, this.type.parser.filter(
 								result => (result+'').length >= info.min,
-								() => `Argument must have a minimum of ${info.min} characters`
+								from => ({
+									info: `Argument must have a minimum of ${info.min} characters`,
+									min: info.min,
+									arg: from.result,
+									argLength: (from.result+'').length
+								})
 							))
 						} else {
 							this.type = changeParser(this.type, this.type.parser.filter(
 								result => Number(result) >= info.min,
-								() => `Argument must be equal to or greater than ${info.min}`
+								from => ({
+									info: `Argument must be equal to or greater than ${info.min}`,
+									min: info.min,
+									arg: from.result,
+								})
 							))
 						}
 					}
@@ -89,12 +105,22 @@ export class Arg<T> {
 						if (/^(word|text)$/.test(info.type)) {
 							this.type = changeParser(this.type, this.type.parser.filter(
 								result => (result+'').length <= info.max,
-								() => `Argument must have a maximum of ${info.max} characters`
+								from => ({
+									info: `Argument must have a maximum of ${info.max} characters`,
+									max: info.max,
+									arg: from.result,
+									argLength: (from.result+'').length
+								})
+								
 							))
 						} else {
 							this.type = changeParser(this.type, this.type.parser.filter(
 								result => Number(result) <= info.max,
-								() => `Argument must be equal to or less than ${info.max}`
+								from => ({
+									info: `Argument must be equal to or less than ${info.max}`,
+									max: info.max,
+									arg: from.result,
+								})
 							))
 						}
 					}
@@ -123,15 +149,13 @@ export class Arg<T> {
 		// Managing error and filter options
 		if (info.error)
 			this.type = changeParser(this.type,
-				this.type.parser.mapError(
-					() => info.error
-				)
+				this.type.parser.mapError(info.error)
 			)
 		
 		if (info.filter)
 			this.type = changeParser(this.type,
 				this.type.parser.filter(
-					info.filter.fn, () => info.filter.error
+					info.filter.fn, info.filter.error
 				)
 			)
 	}
