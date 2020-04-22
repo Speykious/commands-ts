@@ -160,6 +160,7 @@ export class Arg<T> {
 			)
 	}
 
+	/** Arg parser function. */
 	async parse(targetString: string, index: number = 0) {
 		try {
 			return Promise.resolve(

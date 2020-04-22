@@ -2,6 +2,7 @@ import { ArgInfo, Arg } from './Arg'
 import { ArgTypeTuple } from './ArgType'
 import { Parser, str, choice, spaces, ParserState, tuple, join } from 'parsers-ts'
 
+/** Set of required and optional properties used to build a new Option object. */
 export interface OptionInfo {
 	/** The name of the option. */
 	name: string
@@ -66,7 +67,15 @@ export class Option {
 	}
 
 	/** Option parser function. */
-	parse(targetString: string, index: number = 0) {
-		return this.parser.transformer(new ParserState(targetString, index))
+	async parse(targetString: string, index: number = 0) {
+		try {
+			return Promise.resolve(
+				this.parser.transformer(
+					new ParserState(targetString, index)
+				)
+			)
+		} catch (err) {
+			return Promise.reject(err)
+		}
 	}
 }
