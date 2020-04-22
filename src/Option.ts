@@ -37,7 +37,7 @@ export class Option {
 			str(`-${this.short}`)
 		).map(() => true)
 
-		if (this.arguments) {
+		if (info.arguments) {
 			this.arguments = info.arguments.map(argi => new Arg(types, argi))
 			this.parser = join(tuple(
 				this.parser,
