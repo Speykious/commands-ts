@@ -1,71 +1,24 @@
 import { Arg } from '../src/Arg'
-import { ArgTypeTuple } from '../src/ArgType'
-import { Parser, word, choice, between, str, reg, sint, sfloat } from 'parsers-ts'
-
-const betweenQuotes = (qc: string) =>
-	between(str(qc), str(qc))(
-		reg(new RegExp(`^[^${qc}]*`))
-	)
-
-const myTypes = new ArgTypeTuple(
-	{
-		name: 'word',
-		label: name,
-		description: `Any sequence of letters that doesn't contain separator characters.`,
-		parser: word.mapError(from => ({
-			info: `Argument is not a word`,
-			index: from.index
-		}))
-	},
-	{
-		name: 'text',
-		label: name,
-		description: `Either a string between quotes \`"\`, single-quotes \`'\` or backticks \`\`\`, or if none, will take the rest of all the command instruction.`,
-		parser: choice(
-			betweenQuotes("'"),
-			betweenQuotes('"'),
-			betweenQuotes('`'),
-			Parser.void
-		).mapError(`Argument is not a text (how is that even possible???)`)
-	},
-	{
-		name: 'int',
-		label: name,
-		description: `Any integer number.`,
-		parser: sint.mapError(from => ({
-			info: `Argument is not an int`,
-			index: from.index
-		}))
-	},
-	{
-		name: 'float',
-		label: name,
-		description: `Any floating number.`,
-		parser: sfloat.mapError(from => ({
-			info: `Argument is not a float`,
-			index: from.index
-		}))
-	}
-)
+import { defaultTypes } from '../src/defaultTypes'
 
 test('ArgTypeTuple construction', () => {
-	expect(myTypes[0].name).toBe('word')
-	expect(myTypes[1].name).toBe('text')
-	expect(myTypes[2].name).toBe('int')
-	expect(myTypes[3].name).toBe('float')
+	expect(defaultTypes[0].name).toBe('word')
+	expect(defaultTypes[1].name).toBe('text')
+	expect(defaultTypes[2].name).toBe('int')
+	expect(defaultTypes[3].name).toBe('float')
 })
 
 test('Get types from ArgTypeTuple', () => {
-	expect(myTypes.getType('word')).toBe(myTypes[0])
-	expect(myTypes.getType('text')).toBe(myTypes[1])
-	expect(myTypes.getType('int')).toBe(myTypes[2])
-	expect(myTypes.getType('float')).toBe(myTypes[3])
+	expect(defaultTypes.getType('word')).toBe(defaultTypes[0])
+	expect(defaultTypes.getType('text')).toBe(defaultTypes[1])
+	expect(defaultTypes.getType('int')).toBe(defaultTypes[2])
+	expect(defaultTypes.getType('float')).toBe(defaultTypes[3])
 })
 
 // Make different tests, each with a separate Arg object to expect things out of
 
 test('Argument object: simple-word', async () => {
-	const arg = new Arg<string>(myTypes, {
+	const arg = new Arg<string>(defaultTypes, {
 		label: 'simple-word',
 		description: `Just a simple word`,
 		type: 'word'
@@ -73,7 +26,7 @@ test('Argument object: simple-word', async () => {
 
 	expect(arg.default).toBe(undefined)
 	expect(arg.label).toBe('simple-word')
-	expect(arg.type).toBe(myTypes[0])
+	expect(arg.type).toBe(defaultTypes[0])
 
 	const yes = await arg.parse('yes-yes no')
 	expect(yes.result).toBe('yes')
@@ -84,7 +37,7 @@ test('Argument object: simple-word', async () => {
 })
 
 test('Argument object: integers', async () => {
-	const arg = new Arg<string>(myTypes, {
+	const arg = new Arg<string>(defaultTypes, {
 		label: 'simple-integer',
 		description: `Just a simple integer`,
 		type: 'int',
@@ -93,7 +46,7 @@ test('Argument object: integers', async () => {
 
 	expect(arg.default).toBe(3)
 	expect(arg.label).toBe('simple-integer')
-	expect(arg.type).toBe(myTypes[2])
+	expect(arg.type).toBe(defaultTypes[2])
 
 	const n1 = await arg.parse('123 456')
 	const n2 = await arg.parse('+4069')
@@ -109,7 +62,7 @@ test('Argument object: integers', async () => {
 })
 
 test('Argument object: ranged integers', async () => {
-	const arg = new Arg<string>(myTypes, {
+	const arg = new Arg<string>(defaultTypes, {
 		label: 'ranged-integer',
 		description: `A ranged integer this time`,
 		type: 'int',
@@ -118,9 +71,9 @@ test('Argument object: ranged integers', async () => {
 	})
 
 	expect(arg.label).toBe('ranged-integer')
-	expect(arg.type.name).toBe(myTypes[2].name)
-	expect(arg.type.description).toBe(myTypes[2].description)
-	expect(arg.type.label).toBe(myTypes[2].label)
+	expect(arg.type.name).toBe(defaultTypes[2].name)
+	expect(arg.type.description).toBe(defaultTypes[2].description)
+	expect(arg.type.label).toBe(defaultTypes[2].label)
 
 	const n1 = await arg.parse('123')
 	const n2 = await arg.parse('-654')
@@ -142,7 +95,7 @@ test('Argument object: ranged integers', async () => {
 })
 
 test('Argument object: ranged length of characters', async () => {
-	const arg = new Arg<string>(myTypes, {
+	const arg = new Arg<string>(defaultTypes, {
 		label: 'limited-text',
 		description: `A ranged integer this time`,
 		type: 'text',
@@ -151,9 +104,9 @@ test('Argument object: ranged length of characters', async () => {
 	})
 
 	expect(arg.label).toBe('limited-text')
-	expect(arg.type.name).toBe(myTypes[1].name)
-	expect(arg.type.description).toBe(myTypes[1].description)
-	expect(arg.type.label).toBe(myTypes[1].label)
+	expect(arg.type.name).toBe(defaultTypes[1].name)
+	expect(arg.type.description).toBe(defaultTypes[1].description)
+	expect(arg.type.label).toBe(defaultTypes[1].label)
 
 	const n1 = await arg.parse('abc')
 	const n2 = await arg.parse('"hello!" and then more characters')
@@ -176,7 +129,7 @@ test('Argument object: ranged length of characters', async () => {
 
 
 test('Argument object: one of several texts to choose from', async () => {
-	const arg = new Arg<string>(myTypes, {
+	const arg = new Arg<string>(defaultTypes, {
 		label: 'hello-text',
 		description: `Is it hello or world?`,
 		type: 'text',
@@ -204,7 +157,7 @@ test('Argument object: one of several texts to choose from', async () => {
 
 test('Argument object: incompatibility between oneOf and min/max', async () => {
 	try {
-		new Arg<string>(myTypes, {
+		new Arg<string>(defaultTypes, {
 			label: 'impossible',
 			description: `This argument cannot exist.`,
 			type: 'word',
@@ -216,7 +169,7 @@ test('Argument object: incompatibility between oneOf and min/max', async () => {
 	}
 
 	try {
-		new Arg<string>(myTypes, {
+		new Arg<string>(defaultTypes, {
 			label: 'impossible2',
 			description: `This second argument cannot exist.`,
 			type: 'word',
