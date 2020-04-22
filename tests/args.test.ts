@@ -1,7 +1,6 @@
 import { Arg } from '../src/Arg'
 import { ArgTypeTuple } from '../src/ArgType'
-import { Parser, word, choice, between, str, reg } from 'parsers-ts'
-import { isOneOf } from '../src/utils'
+import { Parser, word, choice, between, str, reg, sint, sfloat } from 'parsers-ts'
 
 const betweenQuotes = (qc: string) =>
 	between(str(qc), str(qc))(
@@ -13,7 +12,10 @@ const myTypes = new ArgTypeTuple(
 		name: 'word',
 		label: name,
 		description: `Any sequence of letters that doesn't contain separator characters.`,
-		parser: word.mapError((targetString, index) => `Argument is not a word at index ${index}`)
+		parser: word.mapError(from => ({
+			info: `Argument is not a word`,
+			index: from.index
+		}))
 	},
 	{
 		name: 'text',
@@ -24,25 +26,25 @@ const myTypes = new ArgTypeTuple(
 			betweenQuotes('"'),
 			betweenQuotes('`'),
 			Parser.void
-		).mapError(() => `Argument is not a text (how is that even possible???)`)
+		).mapError(`Argument is not a text (how is that even possible???)`)
 	},
 	{
 		name: 'int',
 		label: name,
 		description: `Any integer number.`,
-		parser: Parser.newStandard(/^[+-]?\d+/,
-			matchString => Number(matchString),
-			(targetString, index) => `Argument is not an integer at index ${index}`
-		)
+		parser: sint.mapError(from => ({
+			info: `Argument is not an int`,
+			index: from.index
+		}))
 	},
 	{
 		name: 'float',
 		label: name,
 		description: `Any floating number.`,
-		parser: Parser.newStandard(/^[+-]?\d+(\.\d+)?/,
-			matchString => Number(matchString),
-			(targetString, index) => `Argument is not a float at index ${index}`
-		)
+		parser: sfloat.mapError(from => ({
+			info: `Argument is not a float`,
+			index: from.index
+		}))
 	}
 )
 
