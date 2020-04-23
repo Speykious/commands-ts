@@ -24,8 +24,10 @@ export class Option {
 	public short?: string
 	/** The arguments that the option requires. */
 	public arguments?: Arg<unknown>[]
-	/** The parser of the option. */
-	public parser: Parser<boolean | Arg<unknown>[]>
+	/** The parser of the option.
+	 * Only parses the arguments, we assume the name / short has already been parsed. */
+	public parser: Parser<Arg<unknown>[]>
+	public nameParser: Parser<true>
 
 	/** Creates an Option object. */
 	constructor(types: ArgTypeTuple<any[]>, info: OptionInfo) {
@@ -33,37 +35,22 @@ export class Option {
 		this.description = info.description
 		if (info.short) this.short = info.short
 
-		this.parser = choice(
+		this.nameParser = choice(
 			str(`--${this.name}`),
 			str(`-${this.short}`)
 		).map(() => true)
 
 		if (info.arguments) {
 			this.arguments = info.arguments.map(argi => new Arg(types, argi))
-			this.parser = join(tuple(
-				this.parser,
-				...this.arguments.map(arg => arg.type.parser)
-			), spaces).map(result => result.slice(1) as Arg<unknown>[])
-			.mapError(from => {
-				if (from.error.nparser === 0)
-					return {
-						info: `Option "${this.name}" parsing failed`,
-						option: this.name
-					}
-				else return {
-					info: `Argument n°${from.error.nparser} from option "${this.name}" is invalid`,
-					argInfo: from.error.info,
-					narg: from.error.nparser,
-					option: this.name
-				}
-			})
-		} else {
-			this.parser = this.parser
-			.mapError({
-				info: `Option "${this.name}" parsing failed`,
+			this.parser = join(tuple(...this.arguments.map(arg => arg.type.parser)), spaces)
+			.map(result => result.slice(1) as Arg<unknown>[])
+			.mapError(from => ({
+				info: `Argument n°${from.error.nparser + 1} from option "${this.name}" is invalid`,
+				argInfo: from.error.info,
+				narg: from.error.nparser,
 				option: this.name
-			})
-		}
+			}))
+		} else this.parser = Parser.void.map(() => [])
 	}
 
 	/** Option parser function. */
