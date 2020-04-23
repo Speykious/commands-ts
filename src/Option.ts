@@ -27,7 +27,7 @@ export class Option {
 	/** The parser of the option.
 	 * Only parses the arguments, we assume the name / short has already been parsed. */
 	public parser: Parser<Arg<unknown>[]>
-	public nameParser: Parser<true>
+	public nameParser: Parser<Option>
 
 	/** Creates an Option object. */
 	constructor(types: ArgTypeTuple<any[]>, info: OptionInfo) {
@@ -38,7 +38,7 @@ export class Option {
 		this.nameParser = choice(
 			str(`--${this.name}`),
 			str(`-${this.short}`)
-		).map(() => true)
+		).map(() => this)
 
 		if (info.arguments) {
 			this.arguments = info.arguments.map(argi => new Arg(types, argi))
