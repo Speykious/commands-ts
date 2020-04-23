@@ -1,7 +1,7 @@
 import { ArgInfo, Arg } from './Arg'
 import { ArgTypeTuple } from './ArgType'
 import { OptionInfo, Option } from './Option'
-import { Parser } from 'parsers-ts'
+import { Parser, str } from 'parsers-ts'
 
 
 /** A set of required and optional properties used to build a new Command object. */
@@ -43,7 +43,7 @@ export class Command {
 		this.description = info.description
 		this.types = types
 
-		// nameParser goes here
+		this.nameParser = str(this.name).map(() => this)
 
 		let argparsers: Parser<unknown>[]
 
