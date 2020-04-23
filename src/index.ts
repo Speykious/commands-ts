@@ -8,6 +8,7 @@ $name arg1 arg2 arg3 --option1 oparg
 $name
 $name arg
 $name --option1 --option2 oparg1 oparg2
+$name arg1 arg2 --option1 oparg1 oparg2 arg3 arg4
 
 Let's say:
 - Arguments are always required
