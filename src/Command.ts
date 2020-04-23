@@ -54,7 +54,8 @@ export class Command {
 			let optParser = choice(...this.options.map(opt => opt.parser))
 
 			if (argparsers) {
-
+				// Make the command parser according to the index.ts notes
+				
 			} else {
 
 			}
