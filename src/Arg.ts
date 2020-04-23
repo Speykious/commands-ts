@@ -2,7 +2,7 @@ import { ArgType, ArgTypeTuple, changeParser } from './ArgType'
 import { choice, ParserState, ErrorMsgProvider } from 'parsers-ts'
 import { isOneOf } from './utils'
 
-/** A set of required and optional properties used to build a new Argument object. */
+/** A set of required and optional properties used to build a new Arg object. */
 export interface ArgInfo {
 	/** The label of the argument. */
 	label: string
