@@ -27,6 +27,7 @@ export class Option {
 	/** The parser of the option.
 	 * Only parses the arguments, we assume the name / short has already been parsed. */
 	public parser: Parser<Arg<unknown>[]>
+	/** The parser that returns the Option object if the name corresponds. */
 	public nameParser: Parser<Option>
 
 	/** Creates an Option object. */

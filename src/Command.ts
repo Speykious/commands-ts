@@ -1,7 +1,7 @@
 import { ArgInfo, Arg } from './Arg'
 import { ArgTypeTuple } from './ArgType'
 import { OptionInfo, Option } from './Option'
-import { Parser, sequenceOf, tuple, choice } from 'parsers-ts'
+import { Parser } from 'parsers-ts'
 
 
 /** A set of required and optional properties used to build a new Command object. */
@@ -34,12 +34,16 @@ export class Command {
 	/** The parser of the command.
 	 * Only parses the arguments, we assume the name has already been parsed. */
 	public parser: Parser<{ [key: string]: any }>
+	/** The parser that returns the Command object if the name corresponds. */
+	public nameParser: Parser<Command>
 
 	/** Creates a Command object. */
 	constructor(types: ArgTypeTuple<any[]>, info: CommandInfo) {
 		this.name = info.name
 		this.description = info.description
 		this.types = types
+
+		// nameParser goes here
 
 		let argparsers: Parser<unknown>[]
 
@@ -50,7 +54,7 @@ export class Command {
 
 		if (info.options) {
 			this.options = info.options.map(opti => new Option(types, opti))
-			
+
 			if (argparsers) {
 				// Make the command parser according to the index.ts notes
 				
@@ -60,11 +64,5 @@ export class Command {
 		}
 		
 		this.execute = info.execute
-
-		if (this.arguments) {
-			this.parser = sequenceOf(argparsers)
-		} else {
-			
-		}
 	}
 }
