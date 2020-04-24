@@ -2,7 +2,7 @@
   "name": "commands-ts",
   "version": "0.0.0",
   "description": "Using parsers to make interpreting commands easier.",
-  "main": "./index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "start": "node .",
     "test": "jest --config jestconfig.json",
