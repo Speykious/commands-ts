@@ -1,8 +1,13 @@
-import { ArgInfo, Arg } from './Arg'
+import { ArgInfo, Arg, ArgResult, ArgParser } from './Arg'
 import { ArgTypeTuple } from './ArgType'
-import { OptionInfo, Option } from './Option'
-import { Parser, str, choice, sequenceOf, ParserState, succeed } from 'parsers-ts'
+import { OptInfo, Opt, OptResult } from './Option'
+import { Parser, str, choice, ParserState, succeed } from 'parsers-ts'
+import { stateContextual, } from 'parsers-ts/lib/ParserCombinators'
 
+export interface CommandResult {
+	args: ArgResult<unknown>[]
+	opts: OptResult<unknown[]>[]
+}
 
 /** A set of required and optional properties used to build a new Command object. */
 export interface CommandInfo {
@@ -13,9 +18,9 @@ export interface CommandInfo {
 	/** The arguments that the option requires. */
 	arguments?: ArgInfo[]
 	/** The options that the option requires. */
-	options?: OptionInfo[]
+	options?: OptInfo[]
 	/** The function that the command executes when parsed successfully. */
-	execute: (input: { [key: string]: any }) => void
+	execute: (input: CommandResult) => void
 }
 
 export class Command {
@@ -28,12 +33,12 @@ export class Command {
 	/** The arguments that the option requires. */
 	public arguments?: Arg<unknown>[]
 	/** The options that the option requires. */
-	public options?: Option[]
+	public options?: Opt<unknown[]>[]
 	/** The function that the command executes when parsed successfully. */
-	public execute: (input: { [key: string]: any }) => void
+	public execute: (input: CommandResult) => void
 	/** The parser of the command.
 	 * Only parses the arguments, we assume the name has already been parsed. */
-	public parser: Parser<{ [key: string]: any }>
+	public parser: Parser<CommandResult>
 	/** The parser that returns the Command object if the name corresponds. */
 	public nameParser: Parser<Command>
 
@@ -45,33 +50,44 @@ export class Command {
 
 		this.nameParser = str(this.name).map(() => this)
 
-		let argparsers: Parser<unknown>[]
-
+		let argparsers: ArgParser<unknown>[]
 		if (info.arguments) {
 			this.arguments = info.arguments.map(argi => new Arg(types, argi))
-			argparsers = this.arguments.map(arg => arg.type.parser)
-		} else this.parser = succeed({})
-
-		if (info.options) {
-			this.options = info.options.map(opti => new Option(types, opti))
-
-			const optnameparsers = this.options.map(opt => opt.nameParser)
-			const optparser = choice(...optnameparsers)
-
-			if (argparsers) {
-				// Make the command parser according to the index.ts notes
-				this.parser = sequenceOf(
-					argparsers.map(parser => choice(optparser, parser))
-				).chain(result => {
-					if (result instanceof Option) {
-						return result.parser
-					} else return succeed(result)
-				})
-			} else {
-
-			}
+			argparsers = this.arguments.map(arg => arg.parser)
 		}
-		
+
+		let optparser: Parser<Opt<unknown[]>>
+		if (info.options) {
+			this.options = info.options.map(opti => new Opt(types, opti))
+			optparser = choice(...this.options.map(opt => opt.nameParser))
+		}
+	
+		// Make the command parser according to the index.ts notes
+		this.parser = stateContextual<unknown, CommandResult>(function* () {
+			const final: CommandResult = { args: [], opts: [] }
+
+			for (const argparser of [...argparsers, null]) {
+				if (optparser) {
+					while (true) {	// We break out of that loop whenever there aren't any options left
+						const optState = (yield optparser) as ParserState<Opt<unknown[]>>
+						if (optState.error) break
+
+						const optResult = (yield optState.result.parser) as ParserState<OptResult<unknown[]>>
+						if (optResult.error) return optResult.errorify<CommandResult>(optResult.error)
+						final.opts.push(optResult.result)
+					}
+				}
+				
+				if (argparser) {
+					const argResult = (yield argparser) as ParserState<ArgResult<unknown>>
+					if (argResult.error) return argResult.errorify<CommandResult>(argResult.error)
+					final.args.push(argResult.result)
+				}
+			}
+			
+			return (yield succeed(final)) as ParserState<CommandResult>
+		})
+
 		this.execute = info.execute
 	}
 }

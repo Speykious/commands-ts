@@ -1,9 +1,22 @@
-import { ArgInfo, Arg } from './Arg'
+import { ArgInfo, Arg, ArgResult } from './Arg'
 import { ArgTypeTuple } from './ArgType'
 import { Parser, str, choice, spaces, ParserState, tuple, join, succeed } from 'parsers-ts'
 
+/** The result of an Arg's parsing. */
+export interface OptResult<T extends any[]> {
+	/** The result is of type 'opt'. */
+	type: 'opt'
+	/** The name of the option. */
+	name: string
+	/** The argument parsed results. */
+	argsResults: ArgResult<T[number]>[]
+}
+
+/** Parser of an argument. Has to return an ArgResult. */
+export type OptParser<T extends any[]> = Parser<OptResult<T>>
+
 /** Set of required and optional properties used to build a new Option object. */
-export interface OptionInfo {
+export interface OptInfo {
 	/** The name of the option. */
 	name: string
 	/** The description of the option. */
@@ -15,7 +28,7 @@ export interface OptionInfo {
 }
 
 /** An option for a Command. */
-export class Option {
+export class Opt<T extends any[]> {
 	/** The name of the option. */
 	public name: string
 	/** The description of the option. */
@@ -23,15 +36,15 @@ export class Option {
 	/** The short name of the option. Has to be only one character. */
 	public short?: string
 	/** The arguments that the option requires. */
-	public arguments?: Arg<unknown>[]
+	public arguments?: Arg<T[number]>[]
 	/** The parser of the option.
 	 * Only parses the arguments, we assume the name / short has already been parsed. */
-	public parser: Parser<Arg<unknown>[]>
+	public parser: OptParser<T>
 	/** The parser that returns the Option object if the name corresponds. */
-	public nameParser: Parser<Option>
+	public nameParser: Parser<Opt<T>>
 
 	/** Creates an Option object. */
-	constructor(types: ArgTypeTuple<any[]>, info: OptionInfo) {
+	constructor(types: ArgTypeTuple<unknown[]>, info: OptInfo) {
 		this.name = info.name
 		this.description = info.description
 		if (info.short) this.short = info.short
@@ -41,17 +54,24 @@ export class Option {
 			str(`-${this.short}`)
 		).map(() => this)
 
+		let argsParser: Parser<ArgResult<T[number]>[]>
+
 		if (info.arguments) {
 			this.arguments = info.arguments.map(argi => new Arg(types, argi))
-			this.parser = join(tuple(...this.arguments.map(arg => arg.type.parser)), spaces)
-			.map(result => result.slice(1) as Arg<unknown>[])
+			argsParser = join(tuple(...this.arguments.map(arg => arg.parser)), spaces)
 			.mapError(from => ({
 				info: `Argument n°${from.error.nparser + 1} from option "${this.name}" is invalid`,
 				argInfo: from.error.info,
 				narg: from.error.nparser,
 				option: this.name
 			}))
-		} else this.parser = succeed([])
+		} else argsParser = succeed([])
+
+		this.parser = argsParser.map(argsResults => ({
+			type: 'opt',
+			name: this.name,
+			argsResults: argsResults
+		}))
 	}
 
 	/** Option parser function. */

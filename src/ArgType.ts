@@ -1,5 +1,6 @@
 import { Parser } from "parsers-ts"
 
+/** A type for arguments. */
 export interface ArgType<T> {
 	/** The name of the argument type, which is what to enter in any ArgInfo type. */
 	name: string
@@ -11,7 +12,8 @@ export interface ArgType<T> {
 	parser: Parser<T>
 }
 
-export const changeParser = <T>(type: ArgType<T>, newParser: Parser<T>) => {
+/** Changes the parser of an ArgType. */
+export const changeArgParser = <T>(type: ArgType<T>, newParser: Parser<T>) => {
 	const newType = { ...type }
 	newType.parser = newParser
 	return newType

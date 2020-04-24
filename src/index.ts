@@ -10,6 +10,11 @@ $name arg
 $name --option1 --option2 oparg1 oparg2
 $name arg1 arg2 --option1 oparg1 oparg2 arg3 arg4
 
+If the option's name parses successfully, then
+	we parse the option's arguments
+If the option's name doesn't parse successfully, then
+	we parse the argument
+
 Let's say:
 - Arguments are always required
 - Options are always optional
@@ -33,3 +38,12 @@ Options:
 	--professeur (-p)
 	--squatteur (-s)
 */
+
+/**
+ * Duties:
+ * - ADD PARSERS TO ARG AND OPTION TO FACILITATE THE COMMAND PARSING!
+ * - Create new ArgResult and OptResult interfaces
+ * - Add a Parser<ArgResult> in Arg.ts
+ * - Add a Parser<OptResult in Option.ts
+ * - Rework the confusing Command.ts parser constructor
+ */
