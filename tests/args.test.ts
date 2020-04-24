@@ -19,12 +19,13 @@ test('Get types from ArgTypeTuple', () => {
 
 test('Argument object: simple-word', async () => {
 	const arg = new Arg<string>(defaultTypes, {
-		label: 'simple-word',
+		name: 'simple-word',
 		description: `Just a simple word`,
 		type: 'word'
 	})
 
 	expect(arg.default).toBe(undefined)
+	expect(arg.name).toBe('simple-word')
 	expect(arg.label).toBe('simple-word')
 	expect(arg.type).toBe(defaultTypes[0])
 
@@ -38,13 +39,14 @@ test('Argument object: simple-word', async () => {
 
 test('Argument object: integers', async () => {
 	const arg = new Arg<string>(defaultTypes, {
-		label: 'simple-integer',
+		name: 'simple-integer',
 		description: `Just a simple integer`,
 		type: 'int',
 		default: 3
 	})
 
 	expect(arg.default).toBe(3)
+	expect(arg.name).toBe('simple-integer')
 	expect(arg.label).toBe('simple-integer')
 	expect(arg.type).toBe(defaultTypes[2])
 
@@ -63,13 +65,14 @@ test('Argument object: integers', async () => {
 
 test('Argument object: ranged integers', async () => {
 	const arg = new Arg<string>(defaultTypes, {
-		label: 'ranged-integer',
+		name: 'ranged-integer',
 		description: `A ranged integer this time`,
 		type: 'int',
 		min: -30,
 		max: 50
 	})
 
+	expect(arg.name).toBe('ranged-integer')
 	expect(arg.label).toBe('ranged-integer')
 	expect(arg.type.name).toBe(defaultTypes[2].name)
 	expect(arg.type.description).toBe(defaultTypes[2].description)
@@ -96,13 +99,14 @@ test('Argument object: ranged integers', async () => {
 
 test('Argument object: ranged length of characters', async () => {
 	const arg = new Arg<string>(defaultTypes, {
-		label: 'limited-text',
+		name: 'limited-text',
 		description: `A ranged integer this time`,
 		type: 'text',
 		min: 10,
 		max: 50
 	})
 
+	expect(arg.name).toBe('limited-text')
 	expect(arg.label).toBe('limited-text')
 	expect(arg.type.name).toBe(defaultTypes[1].name)
 	expect(arg.type.description).toBe(defaultTypes[1].description)
@@ -130,12 +134,13 @@ test('Argument object: ranged length of characters', async () => {
 
 test('Argument object: one of several texts to choose from', async () => {
 	const arg = new Arg<string>(defaultTypes, {
-		label: 'hello-text',
+		name: 'hello-text',
 		description: `Is it hello or world?`,
 		type: 'text',
 		oneOf: ['hello!', 'hello world!', 'ZA WARUDO', 'shindeiru.']
 	})
 
+	expect(arg.name).toBe('hello-text')
 	expect(arg.label).toBe('hello-text')
 
 	const guess1 = await arg.parse('hello!...')
@@ -158,7 +163,7 @@ test('Argument object: one of several texts to choose from', async () => {
 test('Argument object: incompatibility between oneOf and min/max', async () => {
 	try {
 		new Arg<string>(defaultTypes, {
-			label: 'impossible',
+			name: 'impossible',
 			description: `This argument cannot exist.`,
 			type: 'word',
 			min: 3,
@@ -170,7 +175,7 @@ test('Argument object: incompatibility between oneOf and min/max', async () => {
 
 	try {
 		new Arg<string>(defaultTypes, {
-			label: 'impossible2',
+			name: 'impossible2',
 			description: `This second argument cannot exist.`,
 			type: 'word',
 			max: 10,

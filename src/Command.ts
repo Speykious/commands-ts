@@ -1,6 +1,6 @@
 import { ArgInfo, Arg, ArgResult, ArgParser } from './Arg'
 import { ArgTypeTuple } from './ArgType'
-import { OptInfo, Opt, OptResult } from './Option'
+import { OptInfo, Opt, OptResult } from './Opt'
 import { Parser, str, choice, ParserState, succeed } from 'parsers-ts'
 import { stateContextual, } from 'parsers-ts/lib/ParserCombinators'
 

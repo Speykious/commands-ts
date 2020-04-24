@@ -1,38 +1,38 @@
-import { Option } from '../src/Option'
+import { Opt } from '../src/Opt'
 import { defaultTypes } from '../src/defaultTypes'
 
-test('Options: without arguments - professeur', () => {
-	const opProf = new Option(defaultTypes, {
+test('Options: without arguments - professeur', async () => {
+	const opProf = new Opt(defaultTypes, {
 		name: 'professeur',
 		description: `Si l'utilisateur est un professeur.`,
 		short: 'p'
 	})
 
-	const long1 = opProf.parse("--professeur")
-	const long2 = opProf.parse("--professeur ...then waste of string")
-	const long3 = opProf.parse("--professeurextendedquimarche")
+	const long1 = await opProf.parse("--professeur")
+	const long2 = await opProf.parse("--professeur ...then waste of string")
+	const long3 = await opProf.parse("--professeurextendedquimarche")
 
 	expect(long1.result).toBe(true)
 	expect(long2.result).toBe(true)
 	expect(long3.result).toBe(true)
 
-	const short1 = opProf.parse("-p")
-	const short2 = opProf.parse("-p ...then waste of string")
-	const short3 = opProf.parse("-pextendedquimarche")
+	const short1 = await opProf.parse("-p")
+	const short2 = await opProf.parse("-p ...then waste of string")
+	const short3 = await opProf.parse("-pextendedquimarche")
 
 	expect(short1.result).toBe(true)
 	expect(short2.result).toBe(true)
 	expect(short3.result).toBe(true)
 })
 
-test('Options: with one argument - answer', () => {
-	const opProf = new Option(defaultTypes, {
+test('Options: with one argument - answer', async () => {
+	const opProf = new Opt(defaultTypes, {
 		name: 'answer',
 		description: `To answer yes, or no.`,
 		short: 'a',
 		arguments: [
 			{
-				label: 'answer',
+				name: 'answer',
 				description: 'The answer: yes, or no.',
 				type: 'word',
 				oneOf: ['yes', 'no']
@@ -40,10 +40,10 @@ test('Options: with one argument - answer', () => {
 		]
 	})
 
-	const long1 = opProf.parse("--answer")
-	const long2 = opProf.parse("--answer ...then waste of string")
-	const long3 = opProf.parse("--answer yes")
-	const long4 = opProf.parse("--ansnbhvf")
+	const long1 = await opProf.parse("--answer")
+	const long2 = await opProf.parse("--answer ...then waste of string")
+	const long3 = await opProf.parse("--answer yes")
+	const long4 = await opProf.parse("--ansnbhvf")
 
 	expect(long1.error.info).toBe('Argument n°1 from option "answer" is invalid')
 	expect(long2.error.info).toBe('Argument n°1 from option "answer" is invalid')
@@ -55,10 +55,10 @@ test('Options: with one argument - answer', () => {
 	expect(long3.result).toEqual(['yes'])
 	expect(long4.result).toBe(null)
 
-	const short1 = opProf.parse("-a")
-	const short2 = opProf.parse("-a ...then waste of string")
-	const short3 = opProf.parse("-a yes")
-	const short4 = opProf.parse("-ahjivf")
+	const short1 = await opProf.parse("-a")
+	const short2 = await opProf.parse("-a ...then waste of string")
+	const short3 = await opProf.parse("-a yes")
+	const short4 = await opProf.parse("-ahjivf")
 
 	expect(short1.error.info).toBe('Argument n°1 from option "answer" is invalid')
 	expect(short2.error.info).toBe('Argument n°1 from option "answer" is invalid')
@@ -71,21 +71,21 @@ test('Options: with one argument - answer', () => {
 	expect(short4.result).toBe(null)
 })
 
-test('Options: with multiple arguments - answer', () => {
-	const quizz = new Option(defaultTypes, {
+test('Options: with multiple arguments - answer', async () => {
+	const quizz = new Opt(defaultTypes, {
 		name: 'Quizz',
 		description: `Answer 4 questions!`,
 		short: 'Q',
 		arguments: [
 			{
-				label: 'meth',
+				name: 'meth',
 				description: '1 + 1 = 3.',
 				type: 'word',
 				oneOf: ['true', 'false'],
 				error: `U hav to say tru or fals`
 			},
 			{
-				label: 'maths',
+				name: 'maths',
 				description: '1 + 1 = ?',
 				type: 'int',
 				filter: {
@@ -94,14 +94,14 @@ test('Options: with multiple arguments - answer', () => {
 				}
 			},
 			{
-				label: 'culprit',
+				name: 'culprit',
 				description: 'Who was the culprit?',
 				type: 'word',
 				oneOf: ['Kuriminaru'],
 				error: `Wrong... The culprit was Kuriminaru!!`
 			},
 			{
-				label: 'japanese',
+				name: 'japanese',
 				description: 'What does 九千九百九十九 mean?',
 				type: 'word',
 				oneOf: ['9999'],
@@ -112,11 +112,11 @@ test('Options: with multiple arguments - answer', () => {
 
 
 
-	const long_alright = quizz.parse(`--Quizz false 2 Kuriminaru 9999`)
-	const long_false1 = quizz.parse(`--Quizz neither 2 Kuriminaru 9999`)
-	const long_false2 = quizz.parse(`--Quizz false 5 Kuriminaru 9999`)
-	const long_false3 = quizz.parse(`--Quizz false 2 Innosento 9999`)
-	const long_false4 = quizz.parse(`--Quizz false 2 Kuriminaru banana`)
+	const long_alright = await quizz.parse(`--Quizz false 2 Kuriminaru 9999`)
+	const long_false1 = await quizz.parse(`--Quizz neither 2 Kuriminaru 9999`)
+	const long_false2 = await quizz.parse(`--Quizz false 5 Kuriminaru 9999`)
+	const long_false3 = await quizz.parse(`--Quizz false 2 Innosento 9999`)
+	const long_false4 = await quizz.parse(`--Quizz false 2 Kuriminaru banana`)
 	
 	expect(long_alright.error).toBe(null)
 	expect(long_alright.result).toEqual(['false', 2, 'Kuriminaru', '9999'])
@@ -138,11 +138,11 @@ test('Options: with multiple arguments - answer', () => {
 
 
 
-	const short_alright = quizz.parse(`-Q false 2 Kuriminaru 9999`)
-	const short_false1 = quizz.parse(`-Q neither 2 Kuriminaru 9999`)
-	const short_false2 = quizz.parse(`-Q false 5 Kuriminaru 9999`)
-	const short_false3 = quizz.parse(`-Q false 2 Innosento 9999`)
-	const short_false4 = quizz.parse(`-Q false 2 Kuriminaru banana`)
+	const short_alright = await quizz.parse(`-Q false 2 Kuriminaru 9999`)
+	const short_false1 = await quizz.parse(`-Q neither 2 Kuriminaru 9999`)
+	const short_false2 = await quizz.parse(`-Q false 5 Kuriminaru 9999`)
+	const short_false3 = await quizz.parse(`-Q false 2 Innosento 9999`)
+	const short_false4 = await quizz.parse(`-Q false 2 Kuriminaru banana`)
 	
 	expect(short_alright.error).toBe(null)
 	expect(short_alright.result).toEqual(['false', 2, 'Kuriminaru', '9999'])
