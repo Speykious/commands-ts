@@ -31,7 +31,7 @@ export interface ArgInfo {
 	 * The argument is required if there isn't one,
 	 * and optional if there isn't.
 	 * Cannot be null if defined. */
-	default?: any
+	// default?: any
 	/** The error text to show when the argument is invalid. */
 	error?: ErrorMsgProvider
 	/** Filters the parsed argument result. */
@@ -65,14 +65,14 @@ export class Arg<T> {
 	/** The default value of the argument.
 	 * The argument is required if there isn't one,
 	 * and optional if there isn't. */
-	public default?: T
+	// public default?: T
 
 	/** Creates an Arg<T> object. */
 	constructor(types: ArgTypeTuple<any[]>, info: ArgInfo) {
 		this.name = info.name
 		this.label = info.label ? info.label : info.name
 		this.description = info.description
-		if (info.default) this.default = info.default
+		// if (info.default) this.default = info.default
 
 		let valParser: Parser<T>
 

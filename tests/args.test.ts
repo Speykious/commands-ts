@@ -24,7 +24,7 @@ test('Argument object: simple-word', async () => {
 		type: 'word'
 	})
 
-	expect(arg.default).toBe(undefined)
+	// expect(arg.default).toBe(undefined)
 	expect(arg.name).toBe('simple-word')
 	expect(arg.label).toBe('simple-word')
 	expect(arg.type).toBe(defaultTypes[0])
@@ -45,11 +45,11 @@ test('Argument object: integers', async () => {
 	const arg = new Arg<string>(defaultTypes, {
 		name: 'simple-integer',
 		description: `Just a simple integer`,
-		type: 'int',
-		default: 3
+		type: 'int'
+		// default: 3
 	})
 
-	expect(arg.default).toBe(3)
+	// expect(arg.default).toBe(3)
 	expect(arg.name).toBe('simple-integer')
 	expect(arg.label).toBe('simple-integer')
 	expect(arg.type).toBe(defaultTypes[2])
