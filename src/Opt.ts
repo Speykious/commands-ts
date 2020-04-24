@@ -86,4 +86,16 @@ export class Opt<T extends any[]> {
 			return Promise.reject(err)
 		}
 	}
+
+	async fullParse(targetString: string, index: number = 0) {
+		try {
+			return Promise.resolve(
+				join(tuple(this.nameParser, this.parser), spaces).transformer(
+					new ParserState(targetString, index)
+				)
+			)
+		} catch (err) {
+			return Promise.reject(err)
+		}
+	}
 }
