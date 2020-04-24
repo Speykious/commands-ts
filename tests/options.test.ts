@@ -45,19 +45,19 @@ test('Options: with one argument - answer', async () => {
 	const long3 = await opProf.fullParse("--answer yes")
 	const long4 = await opProf.fullParse("--ansnbhvf")
 
-	console.log(long3)
+	//console.log(long1, long2, long3, long4)
 
 	expect(long1.error.info).toBe('Argument n°1 from option "answer" is invalid')
 	expect(long2.error.info).toBe('Argument n°1 from option "answer" is invalid')
 	expect(long3.error).toBe(null)
-	expect(long4.error.info).toBe('Option "answer" parsing failed')
+	expect(long4.error.info).toBe('Unable to match with any parser')
 
 	expect(long1.result).toBe(null)
 	expect(long2.result).toBe(null)
 
-	expect(long3.result[1].argsResults).toEqual([{
+	expect(long3.result.argsResults).toEqual([{
+		type: 'arg',
 		name: 'answer',
-		type: 'word',
 		value: 'yes'
 	}])
 	expect(long4.result).toBe(null)
@@ -74,9 +74,9 @@ test('Options: with one argument - answer', async () => {
 
 	expect(short1.result).toBe(null)
 	expect(short2.result).toBe(null)
-	expect(short3.result[1].argsResults).toEqual([{
+	expect(short3.result.argsResults).toEqual([{
+		type: 'arg',
 		name: 'answer',
-		type: 'word',
 		value: 'yes'
 	}])
 	expect(short4.result).toBe(null)
@@ -130,7 +130,7 @@ test('Options: with multiple arguments - answer', async () => {
 	const long_false4 = await quizz.fullParse(`--Quizz false 2 Kuriminaru banana`)
 	
 	expect(long_alright.error).toBe(null)
-	expect(long_alright.result[1].argsResults).toEqual([
+	expect(long_alright.result.argsResults).toEqual([
 		{
 			type: 'arg',
 			name: 'meth',
@@ -177,25 +177,25 @@ test('Options: with multiple arguments - answer', async () => {
 	const short_false4 = await quizz.fullParse(`-Q false 2 Kuriminaru banana`)
 	
 	expect(short_alright.error).toBe(null)
-	expect(short_alright.result[1].argsResults).toEqual([
+	expect(short_alright.result.argsResults).toEqual([
 		{
+			type: 'arg',
 			name: 'meth',
-			type: 'word',
 			value: 'false'
 		},
 		{
+			type: 'arg',
 			name: 'maths',
-			type: 'int',
 			value: 2
 		},
 		{
+			type: 'arg',
 			name: 'culprit',
-			type: 'word',
 			value: 'Kuriminaru'
 		},
 		{
+			type: 'arg',
 			name: 'japanese',
-			type: 'word',
 			value: '9999'
 		},
 	])
