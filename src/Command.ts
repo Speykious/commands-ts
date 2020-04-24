@@ -1,8 +1,8 @@
 import { ArgInfo, Arg, ArgResult, ArgParser } from './Arg'
 import { ArgTypeTuple } from './ArgType'
 import { OptInfo, Opt, OptResult } from './Opt'
-import { Parser, str, choice, ParserState, succeed } from 'parsers-ts'
-import { stateContextual, } from 'parsers-ts/lib/ParserCombinators'
+import { Parser, str, choice, ParserState, succeed, spaces } from 'parsers-ts'
+import { stateContextual, many, } from 'parsers-ts/lib/ParserCombinators'
 
 export interface CommandResult {
 	args: ArgResult<unknown>[]
@@ -66,11 +66,19 @@ export class Command {
 		this.parser = stateContextual<unknown, CommandResult>(function* () {
 			const final: CommandResult = { args: [], opts: [] }
 
+			const originalState: ParserState<any> = (yield Parser.nothing)
+
 			for (const argparser of [...argparsers, null]) {
+				yield spaces.mapError(null)
+
 				if (optparser) {
 					while (true) {	// We break out of that loop whenever there aren't any options left
-						const optState = (yield optparser) as ParserState<Opt<unknown[]>>
-						if (optState.error) break
+						const optState = (
+							yield optparser.mapError(null)
+						) as ParserState<Opt<unknown[]>>
+						if (!optState.result) break
+
+						yield spaces.mapError(null)
 
 						const optResult = (yield optState.result.parser) as ParserState<OptResult<unknown[]>>
 						if (optResult.error) return optResult.errorify<CommandResult>(optResult.error)
@@ -84,10 +92,23 @@ export class Command {
 					final.args.push(argResult.result)
 				}
 			}
-			
-			return (yield succeed(final)) as ParserState<CommandResult>
+
+			return originalState.update(originalState.targetString.length, final)
 		})
 
 		this.execute = info.execute
+	}
+
+	/** Command parser function. */
+	async parse(targetString: string, index: number = 0) {
+		try {
+			return Promise.resolve(
+				this.parser.transformer(
+					new ParserState(targetString, index)
+				)
+			)
+		} catch (err) {
+			return Promise.reject(err)
+		}
 	}
 }

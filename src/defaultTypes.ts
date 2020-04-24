@@ -13,6 +13,7 @@ export const defaultTypes = new ArgTypeTuple(
 		description: `Any sequence of letters that doesn't contain separator characters.`,
 		parser: word.mapError(from => ({
 			info: `Argument is not a word`,
+			targetArg: from.targetString.slice(from.index),
 			index: from.index
 		}))
 	},
@@ -33,6 +34,7 @@ export const defaultTypes = new ArgTypeTuple(
 		description: `Any integer number.`,
 		parser: sint.mapError(from => ({
 			info: `Argument is not an int`,
+			targetArg: from.targetString.slice(from.index),
 			index: from.index
 		}))
 	},
@@ -42,6 +44,7 @@ export const defaultTypes = new ArgTypeTuple(
 		description: `Any floating number.`,
 		parser: sfloat.mapError(from => ({
 			info: `Argument is not a float`,
+			targetArg: from.targetString.slice(from.index),
 			index: from.index
 		}))
 	}
