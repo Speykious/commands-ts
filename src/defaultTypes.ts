@@ -1,17 +1,24 @@
-import { ArgTypeTuple } from '../src/ArgType'
-import { Parser, word, choice, between, str, reg, sint, sfloat } from 'parsers-ts'
+import { ArgTypeTuple } from '../src/ArgType';
+import {
+	Parser,
+	word,
+	choice,
+	between,
+	str,
+	reg,
+	sint,
+	sfloat
+} from 'parsers-ts';
 
 const betweenQuotes = (qc: string) =>
-	between(str(qc), str(qc))(
-		reg(new RegExp(`^[^${qc}]*`))
-	)
+	between(str(qc), str(qc))(reg(new RegExp(`^[^${qc}]*`)));
 
 export const defaultTypes = new ArgTypeTuple(
 	{
 		name: 'word',
 		label: name,
 		description: `Any sequence of letters that doesn't contain separator characters.`,
-		parser: word.mapError(from => ({
+		parser: word.mapError((from) => ({
 			info: `Argument is not a word`,
 			targetArg: from.targetString.slice(from.index),
 			index: from.index
@@ -32,7 +39,7 @@ export const defaultTypes = new ArgTypeTuple(
 		name: 'int',
 		label: name,
 		description: `Any integer number.`,
-		parser: sint.mapError(from => ({
+		parser: sint.mapError((from) => ({
 			info: `Argument is not an int`,
 			targetArg: from.targetString.slice(from.index),
 			index: from.index
@@ -42,10 +49,10 @@ export const defaultTypes = new ArgTypeTuple(
 		name: 'float',
 		label: name,
 		description: `Any floating number.`,
-		parser: sfloat.mapError(from => ({
+		parser: sfloat.mapError((from) => ({
 			info: `Argument is not a float`,
 			targetArg: from.targetString.slice(from.index),
 			index: from.index
 		}))
 	}
-)
+);
