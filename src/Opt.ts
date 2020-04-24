@@ -1,6 +1,7 @@
 import { ArgInfo, Arg, ArgResult } from './Arg'
 import { ArgTypeTuple } from './ArgType'
-import { Parser, str, choice, spaces, ParserState, tuple, join, succeed } from 'parsers-ts'
+import { Parser, str, choice, spaces, ParserState, tuple, join, succeed, reg } from 'parsers-ts'
+import { stateContextual, many } from 'parsers-ts/lib/ParserCombinators'
 
 /** The result of an Arg's parsing. */
 export interface OptResult<T extends any[]> {
@@ -89,10 +90,18 @@ export class Opt<T extends any[]> {
 
 	async fullParse(targetString: string, index: number = 0) {
 		try {
+			const theNameParser = this.nameParser
+			const theParser = this.parser
 			return Promise.resolve(
-				join(tuple(this.nameParser, this.parser), spaces).transformer(
-					new ParserState(targetString, index)
-				)
+				stateContextual<Opt<T> | OptResult<T>, OptResult<T>>(function* () {
+					const nameState = (yield theNameParser) as ParserState<Opt<T>>
+					if (nameState.error)
+						return nameState.errorify(nameState.error) as ParserState<OptResult<T>>
+
+					yield many(spaces).map(() => null)
+
+					return (yield theParser) as ParserState<OptResult<T>>
+				}).transformer(new ParserState(targetString, index))
 			)
 		} catch (err) {
 			return Promise.reject(err)
