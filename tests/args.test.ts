@@ -30,7 +30,11 @@ test('Argument object: simple-word', async () => {
 	expect(arg.type).toBe(defaultTypes[0])
 
 	const yes = await arg.parse('yes-yes no')
-	expect(yes.result).toBe('yes')
+	expect(yes.result).toEqual({
+		type: 'arg',
+		name: 'simple-word',
+		value: 'yes'
+	})
 	expect(yes.error).toBe(null)
 
 	const wut = await arg.parse('yes-yes no', 3)
@@ -58,9 +62,21 @@ test('Argument object: integers', async () => {
 	expect(n2.error).toBe(null)
 	expect(n3.error).toBe(null)
 
-	expect(n1.result).toBe(123)
-	expect(n2.result).toBe(4069)
-	expect(n3.result).toBe(-666)
+	expect(n1.result).toEqual({
+		type: 'arg',
+		name: 'simple-integer',
+		value: 123
+	})
+	expect(n2.result).toEqual({
+		type: 'arg',
+		name: 'simple-integer',
+		value: 4069
+	})
+	expect(n3.result).toEqual({
+		type: 'arg',
+		name: 'simple-integer',
+		value: -666
+	})
 })
 
 test('Argument object: ranged integers', async () => {
@@ -92,9 +108,21 @@ test('Argument object: ranged integers', async () => {
 
 	expect(n1.result).toBe(null)
 	expect(n2.result).toBe(null)
-	expect(n3.result).toBe(18)
-	expect(n4.result).toBe(0)
-	expect(n5.result).toBe(-2)
+	expect(n3.result).toEqual({
+		type: 'arg',
+		name: 'ranged-integer',
+		value: 18
+	})
+	expect(n4.result).toEqual({
+		type: 'arg',
+		name: 'ranged-integer',
+		value: 0
+	})
+	expect(n5.result).toEqual({
+		type: 'arg',
+		name: 'ranged-integer',
+		value: -2
+	})
 })
 
 test('Argument object: ranged length of characters', async () => {
@@ -127,8 +155,16 @@ test('Argument object: ranged length of characters', async () => {
 	expect(n1.result).toBe(null)
 	expect(n2.result).toBe(null)
 	expect(n3.result).toBe(null)
-	expect(n4.result).toBe('Hello world!')
-	expect(n5.result).toBe('Omae wa mou shindeiru.')
+	expect(n4.result).toEqual({
+		type: 'arg',
+		name: 'limited-text',
+		value: 'Hello world!'
+	})
+	expect(n5.result).toEqual({
+		type: 'arg',
+		name: 'limited-text',
+		value: 'Omae wa mou shindeiru.'
+	})
 })
 
 
@@ -154,9 +190,21 @@ test('Argument object: one of several texts to choose from', async () => {
 	expect(guess4.error).toBe(null)
 
 	expect(guess1.result).toBe(null)
-	expect(guess2.result).toBe('hello!')
-	expect(guess3.result).toBe('ZA WARUDO')
-	expect(guess4.result).toBe('shindeiru.')
+	expect(guess2.result).toEqual({
+		type: 'arg',
+		name: 'hello-text',
+		value: 'hello!'
+	})
+	expect(guess3.result).toEqual({
+		type: 'arg',
+		name: 'hello-text',
+		value: 'ZA WARUDO'
+	})
+	expect(guess4.result).toEqual({
+		type: 'arg',
+		name: 'hello-text',
+		value: 'shindeiru.'
+	})
 })
 
 
