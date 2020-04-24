@@ -38,12 +38,3 @@ Options:
 	--professeur (-p)
 	--squatteur (-s)
 */
-
-/**
- * Duties:
- * - ADD PARSERS TO ARG AND OPTION TO FACILITATE THE COMMAND PARSING!
- * - Create new ArgResult and OptResult interfaces
- * - Add a Parser<ArgResult> in Arg.ts
- * - Add a Parser<OptResult in Option.ts
- * - Rework the confusing Command.ts parser constructor
- */
