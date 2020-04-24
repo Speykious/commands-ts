@@ -8,8 +8,7 @@ import {
 	ParserState,
 	tuple,
 	join,
-	succeed,
-	reg
+	succeed
 } from 'parsers-ts'
 import { stateContextual, many } from 'parsers-ts/lib/ParserCombinators'
 
