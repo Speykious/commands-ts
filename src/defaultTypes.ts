@@ -1,4 +1,4 @@
-import { ArgTypeTuple } from '../src/ArgType'
+import { ArgTypeTuple } from './ArgType'
 import {
 	Parser,
 	word,
@@ -16,7 +16,7 @@ const betweenQuotes = (qc: string) =>
 export const defaultTypes = new ArgTypeTuple(
 	{
 		name: 'word',
-		label: name,
+		label: 'Word',
 		description: `Any sequence of letters that doesn't contain separator characters.`,
 		parser: word.mapError((from) => ({
 			info: `Argument is not a word`,
@@ -26,7 +26,7 @@ export const defaultTypes = new ArgTypeTuple(
 	},
 	{
 		name: 'text',
-		label: name,
+		label: 'Text',
 		description: `Either a string between quotes \`"\`, single-quotes \`'\` or backticks \`\`\`, or if none, will take the rest of all the command instruction.`,
 		parser: choice(
 			betweenQuotes("'"),
@@ -37,7 +37,7 @@ export const defaultTypes = new ArgTypeTuple(
 	},
 	{
 		name: 'int',
-		label: name,
+		label: 'Int',
 		description: `Any integer number.`,
 		parser: sint.mapError((from) => ({
 			info: `Argument is not an int`,
@@ -47,7 +47,7 @@ export const defaultTypes = new ArgTypeTuple(
 	},
 	{
 		name: 'float',
-		label: name,
+		label: 'Float',
 		description: `Any floating number.`,
 		parser: sfloat.mapError((from) => ({
 			info: `Argument is not a float`,
