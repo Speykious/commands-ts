@@ -1,7 +1,7 @@
 import { ArgInfo, Arg } from './Arg'
 import { ArgTypeTuple } from './ArgType'
 import { OptionInfo, Option } from './Option'
-import { Parser, str } from 'parsers-ts'
+import { Parser, str, choice, sequenceOf, ParserState, succeed } from 'parsers-ts'
 
 
 /** A set of required and optional properties used to build a new Command object. */
@@ -50,16 +50,23 @@ export class Command {
 		if (info.arguments) {
 			this.arguments = info.arguments.map(argi => new Arg(types, argi))
 			argparsers = this.arguments.map(arg => arg.type.parser)
-		} else this.parser = Parser.void.map(() => ({}))
+		} else this.parser = succeed({})
 
 		if (info.options) {
 			this.options = info.options.map(opti => new Option(types, opti))
 
-			
+			const optnameparsers = this.options.map(opt => opt.nameParser)
+			const optparser = choice(...optnameparsers)
 
 			if (argparsers) {
 				// Make the command parser according to the index.ts notes
-				
+				this.parser = sequenceOf(
+					argparsers.map(parser => choice(optparser, parser))
+				).chain(result => {
+					if (result instanceof Option) {
+						return result.parser
+					} else return succeed(result)
+				})
 			} else {
 
 			}

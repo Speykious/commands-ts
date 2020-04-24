@@ -1,6 +1,6 @@
 import { ArgInfo, Arg } from './Arg'
 import { ArgTypeTuple } from './ArgType'
-import { Parser, str, choice, spaces, ParserState, tuple, join } from 'parsers-ts'
+import { Parser, str, choice, spaces, ParserState, tuple, join, succeed } from 'parsers-ts'
 
 /** Set of required and optional properties used to build a new Option object. */
 export interface OptionInfo {
@@ -51,7 +51,7 @@ export class Option {
 				narg: from.error.nparser,
 				option: this.name
 			}))
-		} else this.parser = Parser.void.map(() => [])
+		} else this.parser = succeed([])
 	}
 
 	/** Option parser function. */
