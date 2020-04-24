@@ -12,17 +12,17 @@ test('Options: without arguments - professeur', async () => {
 	const long2 = await opProf.parse("--professeur ...then waste of string")
 	const long3 = await opProf.parse("--professeurextendedquimarche")
 
-	expect(long1.result).toBe(true)
-	expect(long2.result).toBe(true)
-	expect(long3.result).toBe(true)
+	expect(!!long1.result).toBe(true)
+	expect(!!long2.result).toBe(true)
+	expect(!!long3.result).toBe(true)
 
 	const short1 = await opProf.parse("-p")
 	const short2 = await opProf.parse("-p ...then waste of string")
 	const short3 = await opProf.parse("-pextendedquimarche")
 
-	expect(short1.result).toBe(true)
-	expect(short2.result).toBe(true)
-	expect(short3.result).toBe(true)
+	expect(!!short1.result).toBe(true)
+	expect(!!short2.result).toBe(true)
+	expect(!!short3.result).toBe(true)
 })
 
 test('Options: with one argument - answer', async () => {
@@ -52,7 +52,11 @@ test('Options: with one argument - answer', async () => {
 
 	expect(long1.result).toBe(null)
 	expect(long2.result).toBe(null)
-	expect(long3.result).toEqual(['yes'])
+	expect(long3.result.argsResults).toEqual([{
+		name: 'answer',
+		type: 'word',
+		value: 'yes'
+	}])
 	expect(long4.result).toBe(null)
 
 	const short1 = await opProf.parse("-a")
@@ -67,7 +71,11 @@ test('Options: with one argument - answer', async () => {
 
 	expect(short1.result).toBe(null)
 	expect(short2.result).toBe(null)
-	expect(short3.result).toEqual(['yes'])
+	expect(short3.result.argsResults).toEqual([{
+		name: 'answer',
+		type: 'word',
+		value: 'yes'
+	}])
 	expect(short4.result).toBe(null)
 })
 
@@ -119,7 +127,28 @@ test('Options: with multiple arguments - answer', async () => {
 	const long_false4 = await quizz.parse(`--Quizz false 2 Kuriminaru banana`)
 	
 	expect(long_alright.error).toBe(null)
-	expect(long_alright.result).toEqual(['false', 2, 'Kuriminaru', '9999'])
+	expect(long_alright.result.argsResults).toEqual([
+		{
+			name: 'meth',
+			type: 'word',
+			value: 'false'
+		},
+		{
+			name: 'maths',
+			type: 'int',
+			value: 2
+		},
+		{
+			name: 'culprit',
+			type: 'word',
+			value: 'Kuriminaru'
+		},
+		{
+			name: 'japanese',
+			type: 'word',
+			value: '9999'
+		},
+	])
 
 	expect(long_false1.error.info).toBe('Argument n°1 from option "Quizz" is invalid')
 	expect(long_false2.error.info).toBe('Argument n°2 from option "Quizz" is invalid')
@@ -145,7 +174,28 @@ test('Options: with multiple arguments - answer', async () => {
 	const short_false4 = await quizz.parse(`-Q false 2 Kuriminaru banana`)
 	
 	expect(short_alright.error).toBe(null)
-	expect(short_alright.result).toEqual(['false', 2, 'Kuriminaru', '9999'])
+	expect(short_alright.result.argsResults).toEqual([
+		{
+			name: 'meth',
+			type: 'word',
+			value: 'false'
+		},
+		{
+			name: 'maths',
+			type: 'int',
+			value: 2
+		},
+		{
+			name: 'culprit',
+			type: 'word',
+			value: 'Kuriminaru'
+		},
+		{
+			name: 'japanese',
+			type: 'word',
+			value: '9999'
+		},
+	])
 
 	expect(short_false1.error.info).toBe('Argument n°1 from option "Quizz" is invalid')
 	expect(short_false2.error.info).toBe('Argument n°2 from option "Quizz" is invalid')
