@@ -70,21 +70,17 @@ export class Command {
 			const originalState: ParserState<any> = yield Parser.nothing
 			let narg = 1
 			for (const argparser of [...argparsers, null]) {
-				yield spaces.mapError(null)
-
 				if (optparser) {
+					yield spaces.mapError(null)
+
 					while (true) {
 						// We break out of that loop whenever there aren't any options left
-						const optState = (yield optparser.mapError(null)) as ParserState<
-							Opt<unknown[]>
-						>
+						const optState = (yield optparser.mapError(null)) as ParserState<Opt<unknown[]>>
 						if (!optState.result) break
 
 						yield spaces.mapError(null)
 
-						const optResult = (yield optState.result.parser) as ParserState<
-							OptResult<unknown[]>
-						>
+						const optResult = (yield optState.result.parser) as ParserState<OptResult<unknown[]>>
 						if (optResult.error)
 							return optResult.errorify<CommandResult>(optResult.error)
 						final.opts.push(optResult.result)
@@ -92,6 +88,8 @@ export class Command {
 				}
 
 				if (argparser) {
+					yield spaces.mapError(null)
+
 					const argResult = (yield argparser) as ParserState<ArgResult<unknown>>
 					if (argResult.error)
 						return argResult.errorify<CommandResult>(() => ({
@@ -102,6 +100,8 @@ export class Command {
 						}))
 					final.args.push(argResult.result)
 				}
+
+				narg++
 			}
 
 			return originalState.update(originalState.targetString.length, final)
