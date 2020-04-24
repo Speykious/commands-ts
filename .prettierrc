@@ -2,5 +2,6 @@
   "proseWrap": "never",
   "trailingComma": "none",
   "singleQuote": true,
-  "useTabs": true
+  "useTabs": true,
+  "semi": false
 }

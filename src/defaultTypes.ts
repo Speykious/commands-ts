@@ -1,4 +1,4 @@
-import { ArgTypeTuple } from '../src/ArgType';
+import { ArgTypeTuple } from '../src/ArgType'
 import {
 	Parser,
 	word,
@@ -8,10 +8,10 @@ import {
 	reg,
 	sint,
 	sfloat
-} from 'parsers-ts';
+} from 'parsers-ts'
 
 const betweenQuotes = (qc: string) =>
-	between(str(qc), str(qc))(reg(new RegExp(`^[^${qc}]*`)));
+	between(str(qc), str(qc))(reg(new RegExp(`^[^${qc}]*`)))
 
 export const defaultTypes = new ArgTypeTuple(
 	{
@@ -55,4 +55,4 @@ export const defaultTypes = new ArgTypeTuple(
 			index: from.index
 		}))
 	}
-);
+)

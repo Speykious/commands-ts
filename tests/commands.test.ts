@@ -1,5 +1,5 @@
-import { Command } from '../src/Command';
-import { defaultTypes } from '../src/defaultTypes';
+import { Command } from '../src/Command'
+import { defaultTypes } from '../src/defaultTypes'
 
 const somewords = new Command(defaultTypes, {
 	name: 'three-words',
@@ -44,14 +44,16 @@ const somewords = new Command(defaultTypes, {
 	],
 
 	execute: (input) => console.log(input)
-});
+})
 
 test('First Command Ever', async () => {
-	const state1 = await somewords.parse('hello world yay --two-more NO PROBLEM');
-	const state2 = await somewords.parse('one two three');
+	const fail1 = await somewords.parse('not enough')
+	const fail2 = await somewords.parse('not enough --two-more with option')
+	const fail3 = await somewords.parse('not enough in --two-more option')
 
 	console.log(
-		JSON.stringify(state1, null, '  '),
-		JSON.stringify(state2, null, '  ')
-	);
-});
+		JSON.stringify(fail1, null, '  '),
+		JSON.stringify(fail2, null, '  '),
+		JSON.stringify(fail3, null, '  ')
+	)
+})
