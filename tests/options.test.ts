@@ -40,10 +40,12 @@ test('Options: with one argument - answer', async () => {
 		]
 	})
 
-	const long1 = await opProf.parse("--answer")
-	const long2 = await opProf.parse("--answer ...then waste of string")
-	const long3 = await opProf.parse("--answer yes")
-	const long4 = await opProf.parse("--ansnbhvf")
+	const long1 = await opProf.fullParse("--answer")
+	const long2 = await opProf.fullParse("--answer ...then waste of string")
+	const long3 = await opProf.fullParse("--answer yes")
+	const long4 = await opProf.fullParse("--ansnbhvf")
+
+	console.log(long3)
 
 	expect(long1.error.info).toBe('Argument n°1 from option "answer" is invalid')
 	expect(long2.error.info).toBe('Argument n°1 from option "answer" is invalid')
@@ -52,17 +54,18 @@ test('Options: with one argument - answer', async () => {
 
 	expect(long1.result).toBe(null)
 	expect(long2.result).toBe(null)
-	expect(long3.result.argsResults).toEqual([{
+
+	expect(long3.result[1].argsResults).toEqual([{
 		name: 'answer',
 		type: 'word',
 		value: 'yes'
 	}])
 	expect(long4.result).toBe(null)
 
-	const short1 = await opProf.parse("-a")
-	const short2 = await opProf.parse("-a ...then waste of string")
-	const short3 = await opProf.parse("-a yes")
-	const short4 = await opProf.parse("-ahjivf")
+	const short1 = await opProf.fullParse("-a")
+	const short2 = await opProf.fullParse("-a ...then waste of string")
+	const short3 = await opProf.fullParse("-a yes")
+	const short4 = await opProf.fullParse("-ahjivf")
 
 	expect(short1.error.info).toBe('Argument n°1 from option "answer" is invalid')
 	expect(short2.error.info).toBe('Argument n°1 from option "answer" is invalid')
@@ -71,7 +74,7 @@ test('Options: with one argument - answer', async () => {
 
 	expect(short1.result).toBe(null)
 	expect(short2.result).toBe(null)
-	expect(short3.result.argsResults).toEqual([{
+	expect(short3.result[1].argsResults).toEqual([{
 		name: 'answer',
 		type: 'word',
 		value: 'yes'
@@ -120,32 +123,32 @@ test('Options: with multiple arguments - answer', async () => {
 
 
 
-	const long_alright = await quizz.parse(`--Quizz false 2 Kuriminaru 9999`)
-	const long_false1 = await quizz.parse(`--Quizz neither 2 Kuriminaru 9999`)
-	const long_false2 = await quizz.parse(`--Quizz false 5 Kuriminaru 9999`)
-	const long_false3 = await quizz.parse(`--Quizz false 2 Innosento 9999`)
-	const long_false4 = await quizz.parse(`--Quizz false 2 Kuriminaru banana`)
+	const long_alright = await quizz.fullParse(`--Quizz false 2 Kuriminaru 9999`)
+	const long_false1 = await quizz.fullParse(`--Quizz neither 2 Kuriminaru 9999`)
+	const long_false2 = await quizz.fullParse(`--Quizz false 5 Kuriminaru 9999`)
+	const long_false3 = await quizz.fullParse(`--Quizz false 2 Innosento 9999`)
+	const long_false4 = await quizz.fullParse(`--Quizz false 2 Kuriminaru banana`)
 	
 	expect(long_alright.error).toBe(null)
-	expect(long_alright.result.argsResults).toEqual([
+	expect(long_alright.result[1].argsResults).toEqual([
 		{
+			type: 'arg',
 			name: 'meth',
-			type: 'word',
 			value: 'false'
 		},
 		{
+			type: 'arg',
 			name: 'maths',
-			type: 'int',
 			value: 2
 		},
 		{
+			type: 'arg',
 			name: 'culprit',
-			type: 'word',
 			value: 'Kuriminaru'
 		},
 		{
+			type: 'arg',
 			name: 'japanese',
-			type: 'word',
 			value: '9999'
 		},
 	])
@@ -167,14 +170,14 @@ test('Options: with multiple arguments - answer', async () => {
 
 
 
-	const short_alright = await quizz.parse(`-Q false 2 Kuriminaru 9999`)
-	const short_false1 = await quizz.parse(`-Q neither 2 Kuriminaru 9999`)
-	const short_false2 = await quizz.parse(`-Q false 5 Kuriminaru 9999`)
-	const short_false3 = await quizz.parse(`-Q false 2 Innosento 9999`)
-	const short_false4 = await quizz.parse(`-Q false 2 Kuriminaru banana`)
+	const short_alright = await quizz.fullParse(`-Q false 2 Kuriminaru 9999`)
+	const short_false1 = await quizz.fullParse(`-Q neither 2 Kuriminaru 9999`)
+	const short_false2 = await quizz.fullParse(`-Q false 5 Kuriminaru 9999`)
+	const short_false3 = await quizz.fullParse(`-Q false 2 Innosento 9999`)
+	const short_false4 = await quizz.fullParse(`-Q false 2 Kuriminaru banana`)
 	
 	expect(short_alright.error).toBe(null)
-	expect(short_alright.result.argsResults).toEqual([
+	expect(short_alright.result[1].argsResults).toEqual([
 		{
 			name: 'meth',
 			type: 'word',
