@@ -24,5 +24,9 @@ export {
 } from './Command'
 
 export {
+	CommandManager
+} from './CommandManager'
+
+export {
 	defaultTypes
 } from './defaultTypes'
