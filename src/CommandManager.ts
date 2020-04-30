@@ -1,4 +1,4 @@
-import { choice, Parser, ParserState } from "parsers-ts";
+import { choice, Parser, ParserState, sequenceOf, many, spaces, tuple } from "parsers-ts";
 import { Command, CommandResult, CommandInfo } from "./Command";
 import { ArgTypeTuple } from "./ArgType";
 
@@ -12,7 +12,10 @@ export class CommandManager extends Array<Command> {
 
 		this.parser = choice(...this.map(command => command.nameParser))
 		.mapError(`Command not found`)
-		.chain(command => command.parser)
+		.chain(command =>
+			sequenceOf(tuple(many(spaces), command.parser))
+			.map(results => results[1])
+		)
 	}
 
 	/** CommandManager parser function. */
