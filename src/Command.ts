@@ -7,6 +7,7 @@ import { stateContextual } from 'parsers-ts/lib/ParserCombinators'
 export interface CommandResult {
 	args: ArgResult<unknown>[]
 	opts: OptResult<unknown[]>[]
+	execute: (input: CommandResult) => void
 }
 
 /** A set of required and optional properties used to build a new Command object. */
@@ -49,6 +50,7 @@ export class Command {
 		this.types = types
 
 		this.nameParser = str(this.name).map(() => this)
+		this.execute = info.execute
 
 		let argparsers: ArgParser<unknown>[]
 		if (info.arguments) {
@@ -63,9 +65,10 @@ export class Command {
 		}
 
 		const theName = this.name
+		const theExecute = this.execute
 		// Make the command parser according to the index.ts notes
 		this.parser = stateContextual<unknown, CommandResult>(function* () {
-			const final: CommandResult = { args: [], opts: [] }
+			const final: CommandResult = { args: [], opts: [], execute: theExecute }
 
 			const originalState: ParserState<any> = yield Parser.nothing
 			let narg = 1
@@ -110,8 +113,6 @@ export class Command {
 
 			return originalState.update(originalState.targetString.length, final)
 		})
-
-		this.execute = info.execute
 	}
 
 	/** Command parser function. Only parses the command's arguments. */
