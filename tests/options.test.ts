@@ -8,17 +8,17 @@ test('Options: without arguments - professeur', async () => {
 		short: 'p'
 	})
 
-	const long1 = await opProf.parse('--professeur')
-	const long2 = await opProf.parse('--professeur ...then waste of string')
-	const long3 = await opProf.parse('--professeurextendedquimarche')
+	const long1 = opProf.parse('--professeur')
+	const long2 = opProf.parse('--professeur ...then waste of string')
+	const long3 = opProf.parse('--professeurextendedquimarche')
 
 	expect(!!long1.result).toBe(true)
 	expect(!!long2.result).toBe(true)
 	expect(!!long3.result).toBe(true)
 
-	const short1 = await opProf.parse('-p')
-	const short2 = await opProf.parse('-p ...then waste of string')
-	const short3 = await opProf.parse('-pextendedquimarche')
+	const short1 = opProf.parse('-p')
+	const short2 = opProf.parse('-p ...then waste of string')
+	const short3 = opProf.parse('-pextendedquimarche')
 
 	expect(!!short1.result).toBe(true)
 	expect(!!short2.result).toBe(true)
@@ -40,10 +40,10 @@ test('Options: with one argument - answer', async () => {
 		]
 	})
 
-	const long1 = await opProf.fullParse('--answer')
-	const long2 = await opProf.fullParse('--answer ...then waste of string')
-	const long3 = await opProf.fullParse('--answer yes')
-	const long4 = await opProf.fullParse('--ansnbhvf')
+	const long1 = opProf.fullParse('--answer')
+	const long2 = opProf.fullParse('--answer ...then waste of string')
+	const long3 = opProf.fullParse('--answer yes')
+	const long4 = opProf.fullParse('--ansnbhvf')
 
 	//console.log(long1, long2, long3, long4)
 
@@ -64,10 +64,10 @@ test('Options: with one argument - answer', async () => {
 	])
 	expect(long4.result).toBe(null)
 
-	const short1 = await opProf.fullParse('-a')
-	const short2 = await opProf.fullParse('-a ...then waste of string')
-	const short3 = await opProf.fullParse('-a yes')
-	const short4 = await opProf.fullParse('-ahjivf')
+	const short1 = opProf.fullParse('-a')
+	const short2 = opProf.fullParse('-a ...then waste of string')
+	const short3 = opProf.fullParse('-a yes')
+	const short4 = opProf.fullParse('-ahjivf')
 
 	expect(short1.error.info).toBe('Argument n°1 from option "answer" is invalid')
 	expect(short2.error.info).toBe('Argument n°1 from option "answer" is invalid')
@@ -125,11 +125,11 @@ test('Options: with multiple arguments - answer', async () => {
 		]
 	})
 
-	const long_alright = await quizz.fullParse(`--Quizz false 2 Kuriminaru 9999`)
-	const long_false1 = await quizz.fullParse(`--Quizz neither 2 Kuriminaru 9999`)
-	const long_false2 = await quizz.fullParse(`--Quizz false 5 Kuriminaru 9999`)
-	const long_false3 = await quizz.fullParse(`--Quizz false 2 Innosento 9999`)
-	const long_false4 = await quizz.fullParse(`--Quizz false 2 Kuriminaru banana`)
+	const long_alright = quizz.fullParse(`--Quizz false 2 Kuriminaru 9999`)
+	const long_false1 = quizz.fullParse(`--Quizz neither 2 Kuriminaru 9999`)
+	const long_false2 = quizz.fullParse(`--Quizz false 5 Kuriminaru 9999`)
+	const long_false3 = quizz.fullParse(`--Quizz false 2 Innosento 9999`)
+	const long_false4 = quizz.fullParse(`--Quizz false 2 Kuriminaru banana`)
 
 	expect(long_alright.error).toBe(null)
 	expect(long_alright.result.argsResults).toEqual([
@@ -180,11 +180,11 @@ test('Options: with multiple arguments - answer', async () => {
 	expect(long_false3.result).toBe(null)
 	expect(long_false4.result).toBe(null)
 
-	const short_alright = await quizz.fullParse(`-Q false 2 Kuriminaru 9999`)
-	const short_false1 = await quizz.fullParse(`-Q neither 2 Kuriminaru 9999`)
-	const short_false2 = await quizz.fullParse(`-Q false 5 Kuriminaru 9999`)
-	const short_false3 = await quizz.fullParse(`-Q false 2 Innosento 9999`)
-	const short_false4 = await quizz.fullParse(`-Q false 2 Kuriminaru banana`)
+	const short_alright = quizz.fullParse(`-Q false 2 Kuriminaru 9999`)
+	const short_false1 = quizz.fullParse(`-Q neither 2 Kuriminaru 9999`)
+	const short_false2 = quizz.fullParse(`-Q false 5 Kuriminaru 9999`)
+	const short_false3 = quizz.fullParse(`-Q false 2 Innosento 9999`)
+	const short_false4 = quizz.fullParse(`-Q false 2 Kuriminaru banana`)
 
 	expect(short_alright.error).toBe(null)
 	expect(short_alright.result.argsResults).toEqual([

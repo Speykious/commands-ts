@@ -114,14 +114,8 @@ export class Command {
 		this.execute = info.execute
 	}
 
-	/** Command parser function. */
-	async parse(targetString: string, index: number = 0) {
-		try {
-			return Promise.resolve(
-				this.parser.transformer(new ParserState(targetString, index))
-			)
-		} catch (err) {
-			return Promise.reject(err)
-		}
+	/** Command parser function. Only parses the command's arguments. */
+	parse(targetString: string, index: number = 0) {
+		return this.parser.transformer(new ParserState(targetString, index))
 	}
 }

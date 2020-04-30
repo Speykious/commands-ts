@@ -47,10 +47,10 @@ const somewords = new Command(defaultTypes, {
 })
 
 test('First Command Ever', async () => {
-	const fail1 = await somewords.parse('not enough')
-	const fail2 = await somewords.parse('not enough --two-more with option')
-	const fail3 = await somewords.parse('--two-more without enough arguments')
-	const fail4 = await somewords.parse('not enough in --two-more option')
+	const fail1 = somewords.parse('not enough')
+	const fail2 = somewords.parse('not enough --two-more with option')
+	const fail3 = somewords.parse('--two-more without enough arguments')
+	const fail4 = somewords.parse('not enough in --two-more option')
 
 	expect(fail1.result).toBe(null)
 	expect(fail2.result).toBe(null)
@@ -70,17 +70,17 @@ test('First Command Ever', async () => {
 		'Argument n°2 from option "two-more" is invalid'
 	)
 
-	const success1 = await somewords.parse('that is enough')
-	const success2 = await somewords.parse(
+	const success1 = somewords.parse('that is enough')
+	const success2 = somewords.parse(
 		'--two-more at start parsing with option'
 	)
-	const success3 = await somewords.parse(
+	const success3 = somewords.parse(
 		'parsing --two-more at midleft with option'
 	)
-	const success4 = await somewords.parse(
+	const success4 = somewords.parse(
 		'parsing with --two-more at midright option'
 	)
-	const success5 = await somewords.parse(
+	const success5 = somewords.parse(
 		'parsing with option --two-more at end'
 	)
 

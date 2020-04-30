@@ -59,9 +59,9 @@ export class Opt<T extends any[]> {
 		this.description = info.description
 		if (info.short) this.short = info.short
 
-		this.nameParser = choice(str(`--${this.name}`), str(`-${this.short}`)).map(
-			() => this
-		)
+		this.nameParser = choice(
+			str(`--${this.name}`), str(`-${this.short}`)
+		).map(() => this)
 
 		let argsParser: Parser<ArgResult<T[number]>[]>
 
@@ -88,35 +88,21 @@ export class Opt<T extends any[]> {
 	}
 
 	/** Option parser function. */
-	async parse(targetString: string, index: number = 0) {
-		try {
-			return Promise.resolve(
-				this.parser.transformer(new ParserState(targetString, index))
-			)
-		} catch (err) {
-			return Promise.reject(err)
-		}
+	parse(targetString: string, index: number = 0) {
+		return this.parser.transformer(new ParserState(targetString, index))
 	}
 
-	async fullParse(targetString: string, index: number = 0) {
-		try {
+	fullParse(targetString: string, index: number = 0) {
 			const theNameParser = this.nameParser
 			const theParser = this.parser
-			return Promise.resolve(
-				stateContextual<Opt<T> | OptResult<T>, OptResult<T>>(function* () {
-					const nameState = (yield theNameParser) as ParserState<Opt<T>>
-					if (nameState.error)
-						return nameState.errorify(nameState.error) as ParserState<
-							OptResult<T>
-						>
+			return stateContextual<Opt<T> | OptResult<T>, OptResult<T>>(function* () {
+				const nameState = (yield theNameParser) as ParserState<Opt<T>>
+				if (nameState.error)
+					return nameState.errorify(nameState.error) as ParserState<OptResult<T>>
 
-					yield many(spaces).map(() => null)
+				yield many(spaces).map(() => null)
 
-					return (yield theParser) as ParserState<OptResult<T>>
-				}).transformer(new ParserState(targetString, index))
-			)
-		} catch (err) {
-			return Promise.reject(err)
-		}
+				return (yield theParser) as ParserState<OptResult<T>>
+			}).transformer(new ParserState(targetString, index))
 	}
 }

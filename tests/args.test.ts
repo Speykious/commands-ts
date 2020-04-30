@@ -29,7 +29,7 @@ test('Argument object: simple-word', async () => {
 	expect(arg.label).toBe('simple-word')
 	expect(arg.type).toBe(defaultTypes[0])
 
-	const yes = await arg.parse('yes-yes no')
+	const yes = arg.parse('yes-yes no')
 	expect(yes.result).toEqual({
 		type: 'arg',
 		name: 'simple-word',
@@ -37,7 +37,7 @@ test('Argument object: simple-word', async () => {
 	})
 	expect(yes.error).toBe(null)
 
-	const wut = await arg.parse('yes-yes no', 3)
+	const wut = arg.parse('yes-yes no', 3)
 	expect(wut.result).toBe(null)
 })
 
@@ -54,9 +54,9 @@ test('Argument object: integers', async () => {
 	expect(arg.label).toBe('simple-integer')
 	expect(arg.type).toBe(defaultTypes[2])
 
-	const n1 = await arg.parse('123 456')
-	const n2 = await arg.parse('+4069')
-	const n3 = await arg.parse('-666')
+	const n1 = arg.parse('123 456')
+	const n2 = arg.parse('+4069')
+	const n3 = arg.parse('-666')
 
 	expect(n1.error).toBe(null)
 	expect(n2.error).toBe(null)
@@ -94,11 +94,11 @@ test('Argument object: ranged integers', async () => {
 	expect(arg.type.description).toBe(defaultTypes[2].description)
 	expect(arg.type.label).toBe(defaultTypes[2].label)
 
-	const n1 = await arg.parse('123')
-	const n2 = await arg.parse('-654')
-	const n3 = await arg.parse('18')
-	const n4 = await arg.parse('+0')
-	const n5 = await arg.parse('-2')
+	const n1 = arg.parse('123')
+	const n2 = arg.parse('-654')
+	const n3 = arg.parse('18')
+	const n4 = arg.parse('+0')
+	const n5 = arg.parse('-2')
 
 	expect(n1.error.info).toBe(`Argument must be equal to or less than 50`)
 	expect(n2.error.info).toBe(`Argument must be equal to or greater than -30`)
@@ -140,13 +140,13 @@ test('Argument object: ranged length of characters', async () => {
 	expect(arg.type.description).toBe(defaultTypes[1].description)
 	expect(arg.type.label).toBe(defaultTypes[1].label)
 
-	const n1 = await arg.parse('abc')
-	const n2 = await arg.parse('"hello!" and then more characters')
-	const n3 = await arg.parse(
+	const n1 = arg.parse('abc')
+	const n2 = arg.parse('"hello!" and then more characters')
+	const n3 = arg.parse(
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 	)
-	const n4 = await arg.parse('Hello world!')
-	const n5 = await arg.parse('"Omae wa mou shindeiru."')
+	const n4 = arg.parse('Hello world!')
+	const n5 = arg.parse('"Omae wa mou shindeiru."')
 
 	expect(n1.error.info).toBe(`Argument must have a minimum of 10 characters`)
 	expect(n2.error.info).toBe(`Argument must have a minimum of 10 characters`)
@@ -180,10 +180,10 @@ test('Argument object: one of several texts to choose from', async () => {
 	expect(arg.name).toBe('hello-text')
 	expect(arg.label).toBe('hello-text')
 
-	const guess1 = await arg.parse('hello!...')
-	const guess2 = await arg.parse('"hello!"...')
-	const guess3 = await arg.parse('ZA WARUDO')
-	const guess4 = await arg.parse("`shindeiru.` 'other unrelated thing'")
+	const guess1 = arg.parse('hello!...')
+	const guess2 = arg.parse('"hello!"...')
+	const guess3 = arg.parse('ZA WARUDO')
+	const guess4 = arg.parse("`shindeiru.` 'other unrelated thing'")
 
 	expect(guess1.error.info).toBe(
 		`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru.", recieved "hello!..." instead`
