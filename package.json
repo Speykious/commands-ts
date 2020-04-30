@@ -1,6 +1,6 @@
 {
   "name": "commands-ts",
-  "version": "0.0.0-beta",
+  "version": "0.0.1-beta",
   "description": "Using parsers to make interpreting commands easier.",
   "main": "./lib/index.js",
   "scripts": {
