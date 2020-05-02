@@ -52,7 +52,7 @@ export class Command {
 		this.nameParser = str(this.name).map(() => this)
 		this.execute = info.execute
 
-		let argparsers: ArgParser<unknown>[]
+		let argparsers: ArgParser<unknown>[] = []
 		if (info.arguments) {
 			this.arguments = info.arguments.map((argi) => new Arg(types, argi))
 			argparsers = this.arguments.map((arg) => arg.parser)
