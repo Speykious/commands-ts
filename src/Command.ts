@@ -38,7 +38,8 @@ export class Command {
 	/** The function that the command executes when parsed successfully. */
 	public execute: (input: CommandResult) => void
 	/** The parser of the command.
-	 * Only parses the arguments, we assume the name has already been parsed. */
+	 * Only parses the arguments, we assume the name has already been parsed.
+	 */
 	public parser: Parser<CommandResult>
 	/** The parser that returns the Command object if the name corresponds. */
 	public nameParser: Parser<Command>
@@ -72,22 +73,25 @@ export class Command {
 
 			const originalState: ParserState<any> = yield Parser.nothing
 			let narg = 1
+			let finalIndex = 0
 			for (const argparser of [...argparsers, null]) {
 				if (optparser) {
 					yield spaces.mapError(null)
 
 					while (true) {
 						// We break out of that loop whenever there aren't any options left
-						const optState = (yield optparser.mapError(null)) as ParserState<
-							Opt<unknown[]>
-						>
+						const optState = (
+							yield optparser.mapError(null)
+						) as ParserState<Opt<unknown[]>>
+						finalIndex = optState.index
 						if (!optState.result) break
 
 						yield spaces.mapError(null)
 
-						const optResult = (yield optState.result.parser) as ParserState<
-							OptResult<unknown[]>
-						>
+						const optResult = (
+							yield optState.result.parser
+						) as ParserState<OptResult<unknown[]>>
+						finalIndex = optResult.index
 						if (optResult.error)
 							return optResult.errorify<CommandResult>(optResult.error)
 						final.opts.push(optResult.result)
@@ -98,11 +102,12 @@ export class Command {
 					yield spaces.mapError(null)
 
 					const argResult = (yield argparser) as ParserState<ArgResult<unknown>>
+					finalIndex = argResult.index
 					if (argResult.error)
 						return argResult.errorify<CommandResult>(() => ({
 							info: `Argument n°${narg} from command "${theName}" is invalid`,
 							command: theName,
-							narg: narg,
+							narg,
 							argInfo: argResult.error
 						}))
 					final.args.push(argResult.result)
@@ -111,7 +116,7 @@ export class Command {
 				narg++
 			}
 
-			return originalState.update(originalState.targetString.length, final)
+			return originalState.update(finalIndex, final)
 		})
 	}
 
