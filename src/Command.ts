@@ -73,7 +73,7 @@ export class Command {
 
 			const originalState: ParserState<any> = yield Parser.nothing
 			let narg = 1
-			let finalIndex = 0
+			let finalIndex = originalState.index
 			for (const argparser of [...argparsers, null]) {
 				if (optparser) {
 					yield spaces.mapError(null)
