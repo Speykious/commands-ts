@@ -43,7 +43,7 @@ const somewords = new Command(defaultTypes, {
 		}
 	],
 
-	execute: (input) => console.log(input)
+	execute: (input) => undefined //console.log(input)
 })
 
 test('First Command Ever', async () => {
@@ -84,12 +84,12 @@ test('First Command Ever', async () => {
 		'parsing with option --two-more at end'
 	)
 
-	console.log(
+	/*console.log(
 		JSON.stringify(fail2, undefined, '  '),
 		JSON.stringify(fail4, undefined, '  '),
 		JSON.stringify(success1, undefined, '  '),
 		JSON.stringify(success3, undefined, '  ')
-	)
+	)*/
 
 	expect(success1.error).toBe(undefined)
 	expect(success2.error).toBe(undefined)

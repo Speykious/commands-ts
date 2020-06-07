@@ -1,32 +1,6 @@
-export {
-	ArgType,
-	ArgTypeTuple
-} from './ArgType'
-
-export {
-	Arg,
-	ArgInfo,
-	ArgParser,
-	ArgResult
-} from './Arg'
-
-export {
-	Opt,
-	OptInfo,
-	OptParser,
-	OptResult
-} from './Opt'
-
-export {
-	Command,
-	CommandInfo,
-	CommandResult
-} from './Command'
-
-export {
-	CommandManager
-} from './CommandManager'
-
-export {
-	defaultTypes
-} from './defaultTypes'
+export * from './ArgType'
+export * from './Arg'
+export * from './Opt'
+export * from './Command'
+export * from './CommandManager'
+export * from './defaultTypes'

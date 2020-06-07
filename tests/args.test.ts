@@ -100,6 +100,8 @@ test('Argument object: ranged integers', async () => {
 	const n4 = arg.parse('+0')
 	const n5 = arg.parse('-2')
 
+	console.log(n1, n2)
+
 	expect(n1.error.info).toBe(`Argument must be equal to or less than 50`)
 	expect(n2.error.info).toBe(`Argument must be equal to or greater than -30`)
 	expect(n3.error).toBe(undefined)
