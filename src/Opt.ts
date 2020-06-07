@@ -89,7 +89,7 @@ export class Opt<T extends any[]> {
 
 	/** Option parser function. */
 	parse(targetString: string, index: number = 0) {
-		return this.parser.transformer(new ParserState(targetString, index))
+		return this.parser.transformer(new ParserState({ targetString, index }))
 	}
 
 	fullParse(targetString: string, index: number = 0) {
@@ -103,6 +103,6 @@ export class Opt<T extends any[]> {
 				yield many(spaces).map(() => undefined)
 
 				return (yield theParser) as ParserState<OptResult<T>>
-			}).transformer(new ParserState(targetString, index))
+			}).transformer(new ParserState({ targetString, index }))
 	}
 }

@@ -185,6 +185,6 @@ export class Arg<T> {
 
 	/** Arg parser function. */
 	parse(targetString: string, index: number = 0) {
-		return this.parser.transformer(new ParserState(targetString, index))
+		return this.parser.transformer(new ParserState({ targetString, index }))
 	}
 }

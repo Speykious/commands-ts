@@ -20,7 +20,7 @@ export class CommandManager extends Array<Command> {
 
 	/** CommandManager parser function. */
 	parse(targetString: string, index: number = 0) {
-		return this.parser.transformer(new ParserState(targetString, index))
+		return this.parser.transformer(new ParserState({ targetString, index }))
 	}
 
 	/** Parses a string and executes the command. If the command isn't valid, it calls the errorCallback. */
