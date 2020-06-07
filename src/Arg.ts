@@ -30,7 +30,7 @@ export interface ArgInfo {
 	/** The default value of the argument.
 	 * The argument is required if there isn't one,
 	 * and optional if there isn't.
-	 * Cannot be null if defined. */
+	 * Cannot be undefined if defined. */
 	// default?: any
 	/** The error text to show when the argument is invalid. */
 	error?: ErrorMsgProvider

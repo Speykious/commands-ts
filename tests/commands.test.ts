@@ -52,10 +52,10 @@ test('First Command Ever', async () => {
 	const fail3 = somewords.parse('--two-more without enough arguments')
 	const fail4 = somewords.parse('not enough in --two-more option')
 
-	expect(fail1.result).toBe(null)
-	expect(fail2.result).toBe(null)
-	expect(fail3.result).toBe(null)
-	expect(fail4.result).toBe(null)
+	expect(fail1.result).toBe(undefined)
+	expect(fail2.result).toBe(undefined)
+	expect(fail3.result).toBe(undefined)
+	expect(fail4.result).toBe(undefined)
 
 	expect(fail1.error.info).toBe(
 		'Argument n°3 from command "three-words" is invalid'
@@ -85,17 +85,17 @@ test('First Command Ever', async () => {
 	)
 
 	console.log(
-		JSON.stringify(fail2, null, '  '),
-		JSON.stringify(fail4, null, '  '),
-		JSON.stringify(success1, null, '  '),
-		JSON.stringify(success3, null, '  ')
+		JSON.stringify(fail2, undefined, '  '),
+		JSON.stringify(fail4, undefined, '  '),
+		JSON.stringify(success1, undefined, '  '),
+		JSON.stringify(success3, undefined, '  ')
 	)
 
-	expect(success1.error).toBe(null)
-	expect(success2.error).toBe(null)
-	expect(success3.error).toBe(null)
-	expect(success4.error).toBe(null)
-	expect(success5.error).toBe(null)
+	expect(success1.error).toBe(undefined)
+	expect(success2.error).toBe(undefined)
+	expect(success3.error).toBe(undefined)
+	expect(success4.error).toBe(undefined)
+	expect(success5.error).toBe(undefined)
 
 	expect(success1.result.opts).toEqual([])
 	expect(success2.result.opts).toEqual([

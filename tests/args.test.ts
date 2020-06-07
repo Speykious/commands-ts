@@ -35,10 +35,10 @@ test('Argument object: simple-word', async () => {
 		name: 'simple-word',
 		value: 'yes'
 	})
-	expect(yes.error).toBe(null)
+	expect(yes.error).toBe(undefined)
 
 	const wut = arg.parse('yes-yes no', 3)
-	expect(wut.result).toBe(null)
+	expect(wut.result).toBe(undefined)
 })
 
 test('Argument object: integers', async () => {
@@ -58,9 +58,9 @@ test('Argument object: integers', async () => {
 	const n2 = arg.parse('+4069')
 	const n3 = arg.parse('-666')
 
-	expect(n1.error).toBe(null)
-	expect(n2.error).toBe(null)
-	expect(n3.error).toBe(null)
+	expect(n1.error).toBe(undefined)
+	expect(n2.error).toBe(undefined)
+	expect(n3.error).toBe(undefined)
 
 	expect(n1.result).toEqual({
 		type: 'arg',
@@ -102,12 +102,12 @@ test('Argument object: ranged integers', async () => {
 
 	expect(n1.error.info).toBe(`Argument must be equal to or less than 50`)
 	expect(n2.error.info).toBe(`Argument must be equal to or greater than -30`)
-	expect(n3.error).toBe(null)
-	expect(n4.error).toBe(null)
-	expect(n5.error).toBe(null)
+	expect(n3.error).toBe(undefined)
+	expect(n4.error).toBe(undefined)
+	expect(n5.error).toBe(undefined)
 
-	expect(n1.result).toBe(null)
-	expect(n2.result).toBe(null)
+	expect(n1.result).toBe(undefined)
+	expect(n2.result).toBe(undefined)
 	expect(n3.result).toEqual({
 		type: 'arg',
 		name: 'ranged-integer',
@@ -151,12 +151,12 @@ test('Argument object: ranged length of characters', async () => {
 	expect(n1.error.info).toBe(`Argument must have a minimum of 10 characters`)
 	expect(n2.error.info).toBe(`Argument must have a minimum of 10 characters`)
 	expect(n3.error.info).toBe(`Argument must have a maximum of 50 characters`)
-	expect(n4.error).toBe(null)
-	expect(n5.error).toBe(null)
+	expect(n4.error).toBe(undefined)
+	expect(n5.error).toBe(undefined)
 
-	expect(n1.result).toBe(null)
-	expect(n2.result).toBe(null)
-	expect(n3.result).toBe(null)
+	expect(n1.result).toBe(undefined)
+	expect(n2.result).toBe(undefined)
+	expect(n3.result).toBe(undefined)
 	expect(n4.result).toEqual({
 		type: 'arg',
 		name: 'limited-text',
@@ -188,11 +188,11 @@ test('Argument object: one of several texts to choose from', async () => {
 	expect(guess1.error.info).toBe(
 		`Argument has to be one of the following values: "hello!", "hello world!", "ZA WARUDO", "shindeiru.", recieved "hello!..." instead`
 	)
-	expect(guess2.error).toBe(null)
-	expect(guess3.error).toBe(null)
-	expect(guess4.error).toBe(null)
+	expect(guess2.error).toBe(undefined)
+	expect(guess3.error).toBe(undefined)
+	expect(guess4.error).toBe(undefined)
 
-	expect(guess1.result).toBe(null)
+	expect(guess1.result).toBe(undefined)
 	expect(guess2.result).toEqual({
 		type: 'arg',
 		name: 'hello-text',

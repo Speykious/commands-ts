@@ -100,7 +100,7 @@ export class Opt<T extends any[]> {
 				if (nameState.error)
 					return nameState.errorify(nameState.error) as ParserState<OptResult<T>>
 
-				yield many(spaces).map(() => null)
+				yield many(spaces).map(() => undefined)
 
 				return (yield theParser) as ParserState<OptResult<T>>
 			}).transformer(new ParserState(targetString, index))
